@@ -32,11 +32,11 @@ exports.getItems = (req, res) => {
 
   condition.offset = condition.page * condition.limit - condition.limit;
 
-  pageInfo = {};
+  let pageInfo = {};
 
-  modelItems.getItemByCond(condition, (error, results, _fields) => {
+  modelItems.getItemByCond(condition, (error, results) => {
     if (!error) {
-      modelItems.getItemsCount(condition, (error, resultCount, _fields) => {
+      modelItems.getItemsCount(condition, (error, resultCount) => {
         if (!error) {
           const totalData = resultCount[0].count;
           const lastPage = Math.ceil(totalData / condition.limit);
@@ -75,7 +75,7 @@ exports.getItems = (req, res) => {
 
 exports.detailItems = (req, res) => {
   const { id } = req.params;
-  modelItems.getItemById(id, (error, results, _fields) => {
+  modelItems.getItemById(id, (error, results) => {
     if (!error) {
       return standardResponse(
         res,
@@ -93,29 +93,21 @@ exports.detailItems = (req, res) => {
 
 exports.updatePartial = (req, res) => {
   const { id } = req.params;
-  modelItems.getItemById(id, (error, results, _fields) => {
+  modelItems.getItemById(id, (error, results) => {
     if (!error) {
       if (results.length > 0) {
         const key = Object.keys(req.body);
         if (key.length == 1) {
           const firstColumn = key[0];
           const dataUpdate = { id, [firstColumn]: req.body[firstColumn] };
-          modelItems.updateItemPartial(
-            dataUpdate,
-            (error, results, _fields) => {
-              if (!error) {
-                return standardResponse(
-                  res,
-                  200,
-                  true,
-                  "Data has been updated"
-                );
-              } else {
-                console.log(error);
-                return standardResponse(res, 500, false, "Data can't update!");
-              }
+          modelItems.updateItemPartial(dataUpdate, (error) => {
+            if (!error) {
+              return standardResponse(res, 200, true, "Data has been updated");
+            } else {
+              console.log(error);
+              return standardResponse(res, 500, false, "Data can't update!");
             }
-          );
+          });
         } else {
           console.log("data's input must single data");
           return standardResponse(
@@ -137,27 +129,29 @@ exports.updatePartial = (req, res) => {
 
 exports.updateItem = (req, res) => {
   const { id } = req.params;
-  modelItems.getItemById(id, (error, results, _fields) => {
-    const { name, price } = req.body;
-    const dataUpdate = { id, name, price };
-    modelItems.updateItem(dataUpdate, (error, results, _fields) => {
-      if (!error) {
-        return standardResponse(res, 200, true, "Data has been updated");
-      } else {
-        console.log(error);
-        return standardResponse(res, 500, false, "Data can't update!");
-      }
-    });
+  modelItems.getItemById(id, (error) => {
+    if (!error) {
+      const { name, price } = req.body;
+      const dataUpdate = { id, name, price };
+      modelItems.updateItem(dataUpdate, (error) => {
+        if (!error) {
+          return standardResponse(res, 200, true, "Data has been updated");
+        } else {
+          console.log(error);
+          return standardResponse(res, 500, false, "Data can't update!");
+        }
+      });
+    }
   });
 };
 
 exports.deleteItem = (req, res) => {
   const { id: idString } = req.params;
   const id = parseInt(idString);
-  modelItems.getItemById(id, (error, results, _fields) => {
+  modelItems.getItemById(id, (error, results) => {
     if (!error) {
       if (results.length > 0) {
-        modelItems.deleteItem(id, (error, results, _fields) => {
+        modelItems.deleteItem(id, (error) => {
           if (!error) {
             return standardResponse(res, 200, true, "Data has been deleted");
           } else {
