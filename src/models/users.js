@@ -1,4 +1,4 @@
-const connection = require("../helpers/db");
+const connection = require("../helpers/database");
 
 const table = "users";
 

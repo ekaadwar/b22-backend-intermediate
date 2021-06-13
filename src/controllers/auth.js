@@ -1,4 +1,13 @@
-const {APP_URL} = process.env
-const modelUsers = require(`${APP_URL}/src/models/users`)
+const { response } = require("../helpers/standardResponse");
+const { createUsers } = require(`../models/users`);
 
-exports.register =  
+exports.register = (req, res) => {
+  createUsers(req.body, (error) => {
+    if (!error) {
+      return response(res, 200, true, "Register successfully!");
+    } else {
+      console.log(error);
+      return response(res, 200, true, "Register successfully!");
+    }
+  });
+};
