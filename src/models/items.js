@@ -1,5 +1,13 @@
 const db = require("../helpers/database");
 
+exports.insertItems = (data, cb) => {
+  db.query(
+    `INSERT INTO items (picture, name, price, category_id) VALUES(?, ?, ?, ?)`,
+    [data.picture, data.name, data.price, data.categoryId],
+    cb
+  );
+};
+
 exports.getItems = (cb) => {
   db.query(
     `SELECT items.id, items.name, items.price, category.name AS category_name, items.created_at, items.updated_at FROM items LEFT JOIN category ON items.category_id = category.id`,
@@ -33,13 +41,6 @@ exports.getItemsCount = (cond, cb) => {
 exports.getItemById = (id, cb) => {
   db.query(
     `SELECT items.id, items.name, items.price, category.name AS category_name, items.created_at, items.updated_at FROM items LEFT JOIN category ON items.category_id = category.id WHERE items.id=${id}`,
-    cb
-  );
-};
-
-exports.insertItems = (data, cb) => {
-  db.query(
-    `INSERT INTO items (name, price, category_id) VALUES('${data.name}', ${data.price}, ${data.categoryId})`,
     cb
   );
 };

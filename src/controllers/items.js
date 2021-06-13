@@ -1,21 +1,28 @@
 const modelItems = require("../models/items");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const { APP_URL } = process.env;
+const itemPicture = require("../helpers/upload").single("picture");
 
 exports.insertItems = (req, res) => {
-  const { name, price, categoryId } = req.body;
-  const dataInsert = { name, price, categoryId };
-  modelItems.insertItems(dataInsert, (error) => {
-    if (!error) {
-      return standardResponse(
-        res,
-        200,
-        true,
-        "Data has been inserted succesfully!"
-      );
-    } else {
-      return standardResponse(res, 500, false, "Data insertion has failed!");
-    }
+  itemPicture(req, res, (error) => {
+    if (error) throw error;
+    console.log(req.file);
+    // const { name, price, categoryId } = req.body;
+    // const dataInsert = { name, price, categoryId };
+    req.body.picture = req.body.picture || null;
+    modelItems.insertItems(req.body, (error) => {
+      if (!error) {
+        return standardResponse(
+          res,
+          200,
+          true,
+          "Data has been inserted succesfully!"
+        );
+      } else {
+        console.log(error);
+        return standardResponse(res, 500, false, "Data insertion has failed!");
+      }
+    });
   });
 };
 
