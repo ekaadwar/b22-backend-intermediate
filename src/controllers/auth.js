@@ -1,4 +1,6 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const { response } = require("../helpers/standardResponse");
 const modelUsers = require(`../models/users`);
 
@@ -23,7 +25,11 @@ exports.login = (req, res) => {
         const user = results[0];
         const compare = await bcrypt.compare(password, user.password);
         if (compare) {
-          response(res, 200, true, "Welcome!", results);
+          const token = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.APP_KEY
+          );
+          response(res, 200, true, "Welcome!", { token });
         } else {
           response(res, 404, false, "Email or Password is wrong!");
         }

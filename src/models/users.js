@@ -15,7 +15,7 @@ exports.createUsers = (data, cb) => {
 
 exports.getUserByEmail = (email, cb) => {
   connection.query(
-    `SELECT email, password FROM users WHERE email=?`,
+    `SELECT id, email, password FROM users WHERE email=?`,
     [email],
     cb
   );
