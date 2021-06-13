@@ -12,3 +12,11 @@ exports.createUsers = (data, cb) => {
     cb
   );
 };
+
+exports.getUserByEmail = (email, cb) => {
+  connection.query(
+    `SELECT email, password FROM users WHERE email=?`,
+    [email],
+    cb
+  );
+};
