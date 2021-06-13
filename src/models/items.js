@@ -57,8 +57,8 @@ exports.updateItemPartial = (data, cb) => {
 
 exports.updateItem = (data, cb) => {
   db.query(
-    `UPDATE items SET name=?, price=? WHERE id=?`,
-    [data.name, data.price, data.id],
+    `UPDATE items SET picture=?, name=?, price=? WHERE id=?`,
+    [data.picture ? data.picture : null, data.name, data.price, data.id],
     cb
   );
 };
