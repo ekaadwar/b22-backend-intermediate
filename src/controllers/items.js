@@ -2,21 +2,24 @@ const modelItems = require("../models/items");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const { APP_URL } = process.env;
 const itemPicture = require("../helpers/upload").single("picture");
+// const path = require("path");
 
 exports.insertItems = (req, res) => {
   itemPicture(req, res, (error) => {
     if (error) throw error;
-    console.log(req.file);
-    // const { name, price, categoryId } = req.body;
-    // const dataInsert = { name, price, categoryId };
-    req.body.picture = req.body.picture || null;
-    modelItems.insertItems(req.body, (error) => {
+    req.body.price = parseInt(req.body.price);
+    req.body.categoryId = parseInt(req.body.categoryId);
+    req.body.picture =
+      `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
+
+    modelItems.insertItems(req.body, (error, results) => {
       if (!error) {
         return standardResponse(
           res,
           200,
           true,
-          "Data has been inserted succesfully!"
+          "Data has been inserted succesfully!",
+          results
         );
       } else {
         console.log(error);

@@ -11,6 +11,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const whiteList = "http://localhost:3000";
 app.use(cors(whiteList));
 
+const { APP_UPLOAD_ROUTE, APP_UPLOAD_PATH } = process.env;
+
+app.use(APP_UPLOAD_ROUTE, express.static(APP_UPLOAD_PATH));
+
 app.get("/", (req, res) => {
   const data = {
     success: true,
