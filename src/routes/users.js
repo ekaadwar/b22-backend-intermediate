@@ -4,7 +4,7 @@ const controllers = require("../controllers/Users");
 const auth = require("../middleware/auth");
 
 route.get("/", auth, controllers.getUsers);
-route.get("/:id", controllers.detailUsers);
-route.post("/", controllers.insertUsers);
+// route.get("/:id", controllers.detailUsers);
+// route.post("/", controllers.insertUsers);
 
 module.exports = route;
