@@ -14,7 +14,7 @@ exports.createUsers = (data, cb) => {
 };
 
 exports.getUserById = (id, cb) => {
-  connection.query(`SELECT name, email FROM ${table} WHERE id=${id}`, cb);
+  connection.query(`SELECT id, name, email FROM ${table} WHERE id=${id}`, cb);
 };
 
 exports.getUserByEmail = (email, cb) => {
@@ -56,6 +56,10 @@ exports.getUsersCount = (cond, cb) => {
     cb
   );
 };
+
+// exports.updateUser = (id, cb) => {
+//   connection.query(`UPDATE `);
+// };
 
 exports.deleteUser = (data, cb) => {
   connection.query(`DELETE FROM ${table} WHERE id=?`, [data], cb);

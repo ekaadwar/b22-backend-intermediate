@@ -82,6 +82,10 @@ exports.getUsers = (req, res) => {
   });
 };
 
+// exports.updateUser = (req, res) => {
+
+// }
+
 exports.deleteUser = (req, res) => {
   getUserRole(req.authUser.id, (error, results) => {
     if (!error) {

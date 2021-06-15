@@ -44,6 +44,10 @@ exports.getItemById = (id, cb) => {
   );
 };
 
+exports.getItemsById = (id, cb) => {
+  db.query(`SELECT name, price FROM items WHERE id IN (?)`, [id], cb);
+};
+
 exports.updateItemPartial = (data, cb) => {
   const key = Object.keys(data);
   const keyLength = key.length;
