@@ -3,7 +3,6 @@ const { getUserRole } = require("../models/users");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const { APP_URL } = process.env;
 const itemPicture = require("../helpers/upload").single("picture");
-// const path = require("path");
 
 exports.insertItems = (req, res) => {
   getUserRole(req.authUser.id, (error, results) => {
@@ -125,37 +124,58 @@ exports.detailItems = (req, res) => {
 };
 
 exports.updatePartial = (req, res) => {
-  const { id } = req.params;
-  modelItems.getItemById(id, (error, results) => {
+  getUserRole(req.authUser.id, (error, results) => {
     if (!error) {
-      if (results.length > 0) {
-        const key = Object.keys(req.body);
-        if (key.length == 1) {
-          const firstColumn = key[0];
-          const dataUpdate = { id, [firstColumn]: req.body[firstColumn] };
-          modelItems.updateItemPartial(dataUpdate, (error) => {
-            if (!error) {
-              return standardResponse(res, 200, true, "Data has been updated");
+      if (results[0].role === "admin") {
+        const { id } = req.params;
+        modelItems.getItemById(id, (error, results) => {
+          if (!error) {
+            if (results.length > 0) {
+              const key = Object.keys(req.body);
+              if (key.length == 1) {
+                const firstColumn = key[0];
+                const dataUpdate = { id, [firstColumn]: req.body[firstColumn] };
+                modelItems.updateItemPartial(dataUpdate, (error) => {
+                  if (!error) {
+                    return standardResponse(
+                      res,
+                      200,
+                      true,
+                      "Data has been updated"
+                    );
+                  } else {
+                    console.log(error);
+                    return standardResponse(
+                      res,
+                      500,
+                      false,
+                      "Data can't update!"
+                    );
+                  }
+                });
+              } else {
+                console.log("data's input must single data");
+                return standardResponse(
+                  res,
+                  400,
+                  false,
+                  "data's input must single data"
+                );
+              }
             } else {
-              console.log(error);
-              return standardResponse(res, 500, false, "Data can't update!");
+              return standardResponse(res, 404, false, "Data not found!");
             }
-          });
-        } else {
-          console.log("data's input must single data");
-          return standardResponse(
-            res,
-            400,
-            false,
-            "data's input must single data"
-          );
-        }
+          } else {
+            console.log(error);
+            return standardResponse(res, 500, false, "Data can't read by id!");
+          }
+        });
       } else {
-        return standardResponse(res, 404, false, "Data not found!");
+        console.log(results[0].role);
+        return standardResponse(res, 400, false, "You have no authority!");
       }
     } else {
-      console.log(error);
-      return standardResponse(res, 500, false, "Data can't read by id!");
+      return standardResponse(res, 400, false, "User not found!");
     }
   });
 };
@@ -164,9 +184,9 @@ exports.updateItem = (req, res) => {
   const { id } = req.params;
   modelItems.getItemById(id, (error) => {
     if (!error) {
-      const { name, price } = req.body;
-      const dataUpdate = { id, name, price };
-      modelItems.updateItem(dataUpdate, (error) => {
+      // const { name, price } = req.body;
+      // const dataUpdate = { id, name, price };
+      modelItems.updateItem(req.body, (error) => {
         if (!error) {
           return standardResponse(res, 200, true, "Data has been updated");
         } else {

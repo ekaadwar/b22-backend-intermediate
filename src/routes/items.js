@@ -6,8 +6,8 @@ const auth = require("../middleware/auth");
 route.get("/", method.getItems);
 route.get("/:id", auth, method.detailItems);
 route.post("/", auth, method.insertItems);
-route.patch("/:id", method.updatePartial);
-route.put("/:id", method.updateItem);
-route.delete("/:id", method.deleteItem);
+route.patch("/:id", auth, method.updatePartial);
+route.put("/:id", auth, method.updateItem);
+route.delete("/:id", auth, method.deleteItem);
 
 module.exports = route;

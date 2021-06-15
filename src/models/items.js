@@ -18,7 +18,6 @@ exports.getItems = (cb) => {
 exports.getItemByCond = (cond, cb) => {
   const orderBy = Object.keys(cond.sort)[0];
   const sort = cond.sort[orderBy];
-
   db.query(
     `
   SELECT items.id, items.name, items.price, category.name AS category_name, items.created_at, items.updated_at 
