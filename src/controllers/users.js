@@ -81,3 +81,46 @@ exports.getUsers = (req, res) => {
     }
   });
 };
+
+exports.deleteUser = (req, res) => {
+  getUserRole(req.authUser.id, (error, results) => {
+    if (!error) {
+      if (results[0].role === "admin") {
+        const { id: idString } = req.params;
+        const id = parseInt(idString);
+        modelUsers.getUserById(id, (error, results) => {
+          if (!error) {
+            if (results.length > 0) {
+              modelUsers.deleteUser(id, (error) => {
+                if (!error) {
+                  return standardResponse(
+                    res,
+                    200,
+                    true,
+                    "Data has been deleted"
+                  );
+                } else {
+                  console.log(error);
+                  return standardResponse(
+                    res,
+                    500,
+                    false,
+                    "Data deletion failed"
+                  );
+                }
+              });
+            }
+          } else {
+            return standardResponse(res, 404, false, "Data not found!");
+          }
+        });
+      } else {
+        console.log(results[0].role);
+        return standardResponse(res, 400, false, "You have no authority!");
+      }
+    } else {
+      console.log(error);
+      return standardResponse(res, 400, false, "An error occured!");
+    }
+  });
+};

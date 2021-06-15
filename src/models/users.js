@@ -13,6 +13,10 @@ exports.createUsers = (data, cb) => {
   );
 };
 
+exports.getUserById = (id, cb) => {
+  connection.query(`SELECT name, email FROM ${table} WHERE id=${id}`, cb);
+};
+
 exports.getUserByEmail = (email, cb) => {
   connection.query(
     `SELECT id, email, password FROM users WHERE email=?`,
@@ -51,4 +55,8 @@ exports.getUsersCount = (cond, cb) => {
     `SELECT COUNT (${table}.id) as count FROM ${table} WHERE ${table}.name LIKE '%${cond.search}%'`,
     cb
   );
+};
+
+exports.deleteUser = (data, cb) => {
+  connection.query(`DELETE FROM ${table} WHERE id=?`, [data], cb);
 };
