@@ -1,31 +1,48 @@
 const modelItems = require("../models/items");
+const { getUserRole } = require("../models/users");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const { APP_URL } = process.env;
 const itemPicture = require("../helpers/upload").single("picture");
 // const path = require("path");
 
 exports.insertItems = (req, res) => {
-  itemPicture(req, res, (error) => {
-    if (error) throw error;
-    // req.body.price = parseInt(req.body.price);
-    // req.body.categoryId = parseInt(req.body.categoryId);
-    req.body.picture =
-      `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
-
-    modelItems.insertItems(req.body, (error, results) => {
-      if (!error) {
+  getUserRole(req.authUser.id, (error, results) => {
+    if (!error) {
+      if (results[0].role === "admin") {
+        itemPicture(req, res, (error) => {
+          if (error) throw error;
+          req.body.picture =
+            `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
+          modelItems.insertItems(req.body, (error) => {
+            if (!error) {
+              return standardResponse(
+                res,
+                200,
+                true,
+                "Data has been inserted succesfully!"
+              );
+            } else {
+              return standardResponse(
+                res,
+                500,
+                false,
+                "Data insertion has failed!"
+              );
+            }
+          });
+        });
+      } else {
+        console.log(results.role[0]);
         return standardResponse(
           res,
-          200,
-          true,
-          "Data has been inserted succesfully!",
-          results
+          400,
+          false,
+          "Sorry, you have no authority!"
         );
-      } else {
-        console.log(error);
-        return standardResponse(res, 500, false, "Data insertion has failed!");
       }
-    });
+    } else {
+      return standardResponse(res, 404, false, "User not found!");
+    }
   });
 };
 

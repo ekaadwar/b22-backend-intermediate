@@ -25,10 +25,8 @@ exports.login = (req, res) => {
         const user = results[0];
         const compare = await bcrypt.compare(password, user.password);
         if (compare) {
-          const token = jwt.sign(
-            { id: user.id, email: user.email },
-            process.env.APP_KEY
-          );
+          const payload = { id: user.id, email: user.email };
+          const token = jwt.sign(payload, process.env.APP_KEY);
           response(res, 200, true, "Welcome!", { token });
         } else {
           response(res, 404, false, "Email or Password is wrong!");
