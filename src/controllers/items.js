@@ -7,8 +7,8 @@ const itemPicture = require("../helpers/upload").single("picture");
 exports.insertItems = (req, res) => {
   itemPicture(req, res, (error) => {
     if (error) throw error;
-    req.body.price = parseInt(req.body.price);
-    req.body.categoryId = parseInt(req.body.categoryId);
+    // req.body.price = parseInt(req.body.price);
+    // req.body.categoryId = parseInt(req.body.categoryId);
     req.body.picture =
       `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
 
