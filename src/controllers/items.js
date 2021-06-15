@@ -87,12 +87,18 @@ exports.detailItems = (req, res) => {
   const { id } = req.params;
   modelItems.getItemById(id, (error, results) => {
     if (!error) {
+      const item = results[0];
+      // console.log(item.picture);
+      if (item.picture !== null && !item.picture.startsWith("http")) {
+        item.picture = `${process.env.APP_URL}${item.picture}`;
+      }
+
       return standardResponse(
         res,
         200,
         true,
         "Data read successfully by id!",
-        results
+        item
       );
     } else {
       console.log(error);
