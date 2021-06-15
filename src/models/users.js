@@ -20,3 +20,7 @@ exports.getUserByEmail = (email, cb) => {
     cb
   );
 };
+
+exports.getUserRole = (id, cb) => {
+  connection.query(`SELECT role FROM ${table} WHERE id=?`, [id], cb);
+};
