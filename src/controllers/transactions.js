@@ -3,6 +3,7 @@ const { codeTransaction } = require("../helpers/transactions");
 const { APP_TRANSACTION_PREFIX } = process.env;
 const { getItemsById } = require("../models/items");
 const modelTrans = require("../models/transactions");
+const { getUserById } = require("../models/users");
 
 exports.createTransaction = (req, res) => {
   // const code = codeTransaction(APP_TRANSACTION_PREFIX, 0);
@@ -15,11 +16,11 @@ exports.createTransaction = (req, res) => {
 
   getItemsById(
     data.items_id.map((id) => parseInt(id)),
-    (error, results) => {
+    (error, items) => {
       if (!error) {
         const code = codeTransaction(APP_TRANSACTION_PREFIX, 1);
 
-        const total = results
+        const total = items
           .map((item, index) => item.price * data.items_amount[index])
           .reduce((acc, curr) => acc + curr);
 
@@ -28,20 +29,28 @@ exports.createTransaction = (req, res) => {
         const paymentMethod = data.payment_method;
         const idUser = req.authUser.id;
 
-        const dataTrans = {
-          code,
-          total,
-          tax,
-          shipping_cost: shippingCost,
-          payment_method: paymentMethod,
-          id_user: idUser,
-        };
-
-        modelTrans.createTransactions(dataTrans, (error, results) => {
+        getUserById(idUser, (error, users) => {
           if (!error) {
-            return response(res, 200, true, results);
+            const shippingAddress = users[0].address;
+            const dataTrans = {
+              code,
+              total,
+              tax,
+              shipping_cost: shippingCost,
+              shipping_address: shippingAddress,
+              payment_method: paymentMethod,
+              id_user: idUser,
+            };
+            console.log(users);
+            modelTrans.createTransactions(dataTrans, (error, results) => {
+              if (!error) {
+                return response(res, 200, true, results);
+              } else {
+                return response(res, 500, false, "Data transfer failed!");
+              }
+            });
           } else {
-            return response(res, 500, false, "Data transfer failed!");
+            return response(res, 500, false, "Adress not found!");
           }
         });
       } else {
