@@ -45,6 +45,44 @@ exports.insertItems = (req, res) => {
   });
 };
 
+exports.updateItem = (req, res) => {
+  const { id } = req.params;
+  modelItems.getItemById(id, (error) => {
+    if (!error) {
+      itemPicture(req, res, (error) => {
+        if (!error) {
+          const { name, price } = req.body;
+          const categoryId = parseInt(req.body.category_id);
+
+          req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+          const { picture } = req.body;
+
+          const dataUpdate = { id, picture, name, price, categoryId };
+
+          modelItems.updateItem(dataUpdate, (error) => {
+            if (!error) {
+              return standardResponse(res, 200, true, "Data has been updated");
+            } else {
+              console.log(error);
+              return standardResponse(res, 500, false, "Data can't update!");
+            }
+          });
+        } else {
+          console.log(error);
+          return standardResponse(res, 500, false, "Error occured!");
+        }
+      });
+    } else {
+      return standardResponse(
+        res,
+        404,
+        false,
+        "The data you want to change is not found!"
+      );
+    }
+  });
+};
+
 exports.getItems = (req, res) => {
   // const condition = req.query.search;
 
@@ -176,24 +214,6 @@ exports.updatePartial = (req, res) => {
       }
     } else {
       return standardResponse(res, 400, false, "User not found!");
-    }
-  });
-};
-
-exports.updateItem = (req, res) => {
-  const { id } = req.params;
-  modelItems.getItemById(id, (error) => {
-    if (!error) {
-      // const { name, price } = req.body;
-      // const dataUpdate = { id, name, price };
-      modelItems.updateItem(req.body, (error) => {
-        if (!error) {
-          return standardResponse(res, 200, true, "Data has been updated");
-        } else {
-          console.log(error);
-          return standardResponse(res, 500, false, "Data can't update!");
-        }
-      });
     }
   });
 };
