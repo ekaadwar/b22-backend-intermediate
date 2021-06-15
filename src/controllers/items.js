@@ -45,44 +45,6 @@ exports.insertItems = (req, res) => {
   });
 };
 
-exports.updateItem = (req, res) => {
-  const { id } = req.params;
-  modelItems.getItemById(id, (error) => {
-    if (!error) {
-      itemPicture(req, res, (error) => {
-        if (!error) {
-          const { name, price } = req.body;
-          const categoryId = parseInt(req.body.category_id);
-
-          req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
-          const { picture } = req.body;
-
-          const dataUpdate = { id, picture, name, price, categoryId };
-
-          modelItems.updateItem(dataUpdate, (error) => {
-            if (!error) {
-              return standardResponse(res, 200, true, "Data has been updated");
-            } else {
-              console.log(error);
-              return standardResponse(res, 500, false, "Data can't update!");
-            }
-          });
-        } else {
-          console.log(error);
-          return standardResponse(res, 500, false, "Error occured!");
-        }
-      });
-    } else {
-      return standardResponse(
-        res,
-        404,
-        false,
-        "The data you want to change is not found!"
-      );
-    }
-  });
-};
-
 exports.getItems = (req, res) => {
   // const condition = req.query.search;
 
@@ -218,21 +180,104 @@ exports.updatePartial = (req, res) => {
   });
 };
 
-exports.deleteItem = (req, res) => {
-  const { id: idString } = req.params;
-  const id = parseInt(idString);
-  modelItems.getItemById(id, (error, results) => {
+exports.updateItem = (req, res) => {
+  getUserRole(req.authUser.id, (error, results) => {
     if (!error) {
-      if (results.length > 0) {
-        modelItems.deleteItem(id, (error) => {
+      if (results[0].role === "admin") {
+        const { id } = req.params;
+        modelItems.getItemById(id, (error) => {
           if (!error) {
-            return standardResponse(res, 200, true, "Data has been deleted");
+            itemPicture(req, res, (error) => {
+              if (!error) {
+                const { name, price } = req.body;
+                const categoryId = parseInt(req.body.category_id);
+
+                req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+                const { picture } = req.body;
+
+                const dataUpdate = { id, picture, name, price, categoryId };
+
+                modelItems.updateItem(dataUpdate, (error) => {
+                  if (!error) {
+                    return standardResponse(
+                      res,
+                      200,
+                      true,
+                      "Data has been updated"
+                    );
+                  } else {
+                    console.log(error);
+                    return standardResponse(
+                      res,
+                      500,
+                      false,
+                      "Data can't update!"
+                    );
+                  }
+                });
+              } else {
+                console.log(error);
+                return standardResponse(res, 500, false, "Error occured!");
+              }
+            });
           } else {
-            console.log(error);
-            return standardResponse(res, 500, false, "Data deletion failed");
+            return standardResponse(
+              res,
+              404,
+              false,
+              "The data you want to change is not found!"
+            );
           }
         });
+      } else {
+        console.log(results[0].role);
+        return standardResponse(res, 400, false, "You have no authority!");
       }
+    } else {
+      return standardResponse(res, 400, false, "An error occured!");
+    }
+  });
+};
+
+exports.deleteItem = (req, res) => {
+  getUserRole(req.authUser.id, (error, results) => {
+    if (!error) {
+      if (results[0].role === "admin") {
+        const { id: idString } = req.params;
+        const id = parseInt(idString);
+        modelItems.getItemById(id, (error, results) => {
+          if (!error) {
+            if (results.length > 0) {
+              modelItems.deleteItem(id, (error) => {
+                if (!error) {
+                  return standardResponse(
+                    res,
+                    200,
+                    true,
+                    "Data has been deleted"
+                  );
+                } else {
+                  console.log(error);
+                  return standardResponse(
+                    res,
+                    500,
+                    false,
+                    "Data deletion failed"
+                  );
+                }
+              });
+            }
+          } else {
+            return standardResponse(res, 404, false, "Data not found!");
+          }
+        });
+      } else {
+        console.log(results[0].role);
+        return standardResponse(res, 400, false, "You have no authority!");
+      }
+    } else {
+      console.log(error);
+      return standardResponse(res, 400, false, "An error occured!");
     }
   });
 };
