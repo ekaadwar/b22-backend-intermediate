@@ -45,7 +45,7 @@ exports.getItemById = (id, cb) => {
 };
 
 exports.getItemsById = (id, cb) => {
-  db.query(`SELECT name, price FROM items WHERE id IN (?)`, [id], cb);
+  db.query(`SELECT id, name, price FROM items WHERE id IN (?)`, [id], cb);
 };
 
 exports.updateItemPartial = (data, cb) => {

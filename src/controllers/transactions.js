@@ -41,10 +41,34 @@ exports.createTransaction = (req, res) => {
               payment_method: paymentMethod,
               id_user: idUser,
             };
-            console.log(users);
+
             modelTrans.createTransactions(dataTrans, (error, results) => {
               if (!error) {
-                return response(res, 200, true, results);
+                items.forEach((item, index) => {
+                  const finalData = {
+                    name: item.name,
+                    price: item.price,
+                    amount: data.items_amount[index],
+                    id_item: item.id,
+                    id_transaction: results.insertId,
+                  };
+                  modelTrans.createItemTransactions(finalData, (error) => {
+                    if (!error) {
+                      console.log(
+                        `Item ${item.id} inserted into items_transaction table`
+                      );
+                    } else {
+                      console.log(error);
+                    }
+                  });
+                });
+
+                return response(
+                  res,
+                  200,
+                  true,
+                  "Transaction data has been saved!"
+                );
               } else {
                 return response(res, 500, false, "Data transfer failed!");
               }

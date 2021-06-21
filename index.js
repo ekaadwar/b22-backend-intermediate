@@ -8,8 +8,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const whiteList = "http://localhost:3000";
-app.use(cors(whiteList));
+app.use(cors());
 
 const { APP_UPLOAD_ROUTE, APP_UPLOAD_PATH } = process.env;
 

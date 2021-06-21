@@ -21,9 +21,16 @@ exports.createTransactions = (data, cb) => {
 
 exports.createItemTransactions = (data, cb) => {
   connection.query(
-    `INSERT INTO item_${table} (name, price, variants, id_item, id_transaction)
-    VALUES (?, ?, ?, ?, ?)`,
-    [data.name, data.price, data.variants, data.id_item, data.id_transaction],
+    `INSERT INTO item_${table} (name, price, variants, amount, id_item, id_transaction)
+    VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      data.name,
+      data.price,
+      data.variants,
+      data.amount,
+      data.id_item,
+      data.id_transaction,
+    ],
     cb
   );
 };
