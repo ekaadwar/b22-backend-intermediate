@@ -15,7 +15,7 @@ exports.createUsers = (data, cb) => {
 
 exports.getUserById = (id, cb) => {
   connection.query(
-    `SELECT id, name, email, address FROM ${table} WHERE id=${id}`,
+    `SELECT id, photo, name, email, address FROM ${table} WHERE id=${id}`,
     cb
   );
 };

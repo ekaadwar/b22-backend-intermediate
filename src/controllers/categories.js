@@ -3,9 +3,14 @@ const { response: standardResponse } = require("../helpers/standardResponse");
 
 exports.insertCate = (req, res) => {
   const { name } = req.body;
-  modelCate.insertCate(name, (error, results, _fields) => {
+  modelCate.insertCate(name, (error) => {
     if (!error) {
-      return standardResponse(res, 200, true, "Data has been inserted succesfully!");
+      return standardResponse(
+        res,
+        200,
+        true,
+        "Data has been inserted succesfully!"
+      );
     } else {
       return standardResponse(res, 500, false, "Data insertion has failed!");
     }
@@ -13,7 +18,7 @@ exports.insertCate = (req, res) => {
 };
 
 exports.getCate = (req, res) => {
-  modelCate.getCate((error, results, _fields) => {
+  modelCate.getCate((error, results) => {
     if (!error) {
       return standardResponse(res, 200, true, "Data read succesfully", results);
     } else {
@@ -24,9 +29,15 @@ exports.getCate = (req, res) => {
 
 exports.detailCate = (req, res) => {
   const { id } = req.params;
-  modelCate.getCateById(id, (error, results, _fields) => {
+  modelCate.getCateById(id, (error, results) => {
     if (!error) {
-      return standardResponse(res, 200, true, "Data read successfully by id!", results);
+      return standardResponse(
+        res,
+        200,
+        true,
+        "Data read successfully by id!",
+        results
+      );
     } else {
       console.log(error);
       return standardResponse(res, 500, false, "Data can't read by id!");
@@ -36,27 +47,31 @@ exports.detailCate = (req, res) => {
 
 exports.updateCate = (req, res) => {
   const { id } = req.params;
-  modelCate.getCateById(id, (error, results, _fields) => {
-    const { name } = req.body;
-    const dataUpdate = { id, name };
-    modelCate.updateCate(dataUpdate, (error, results, _fields) => {
-      if (!error) {
-        return standardResponse(res, 200, true, "Data has been updated");
-      } else {
-        console.log(error);
-        return standardResponse(res, 500, false, "Data can't update!");
-      }
-    });
+  modelCate.getCateById(id, (error) => {
+    if (!error) {
+      const { name } = req.body;
+      const dataUpdate = { id, name };
+      modelCate.updateCate(dataUpdate, (error) => {
+        if (!error) {
+          return standardResponse(res, 200, true, "Data has been updated");
+        } else {
+          console.log(error);
+          return standardResponse(res, 500, false, "Data can't update!");
+        }
+      });
+    } else {
+      return standardResponse(res, 504, false, "Data not found!");
+    }
   });
 };
 
 exports.deleteCate = (req, res) => {
   const { id: idString } = req.params;
   const id = parseInt(idString);
-  modelCate.getCateById(id, (error, results, _fields) => {
+  modelCate.getCateById(id, (error, results) => {
     if (!error) {
       if (results.length > 0) {
-        modelCate.deleteCate(id, (error, results, _fields) => {
+        modelCate.deleteCate(id, (error) => {
           if (!error) {
             return standardResponse(res, 200, true, "Data has been deleted");
           } else {

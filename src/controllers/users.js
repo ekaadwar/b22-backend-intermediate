@@ -82,9 +82,15 @@ exports.getUsers = (req, res) => {
   });
 };
 
-// exports.updateUser = (req, res) => {
-
-// }
+exports.getProfil = (req, res) => {
+  modelUsers.getUserById(req.authUser.id, (error, results) => {
+    if (!error) {
+      return standardResponse(res, 200, true, results);
+    } else {
+      return standardResponse(res, 404, false, "Data not found!");
+    }
+  });
+};
 
 exports.deleteUser = (req, res) => {
   getUserRole(req.authUser.id, (error, results) => {
