@@ -4,7 +4,7 @@ const method = require("../controllers/items");
 const auth = require("../middleware/auth");
 
 route.get("/", method.getItems);
-route.get("/:id", auth, method.detailItems);
+route.get("/:id", method.detailItems);
 route.post("/", auth, method.insertItems);
 route.patch("/:id", auth, method.updatePartial);
 route.put("/:id", auth, method.updateItem);

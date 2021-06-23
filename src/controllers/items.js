@@ -52,7 +52,7 @@ exports.getItems = (req, res) => {
   condition.search = condition.search || "";
   condition.sort = condition.sort || {};
   condition.sort.name = condition.sort.name || "ASC";
-  condition.limit = parseInt(condition.limit) || 5;
+  condition.limit = parseInt(condition.limit) || 12;
   condition.offset = parseInt(condition.offset) || 0;
   condition.page = parseInt(condition.page) || 1;
 
