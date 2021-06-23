@@ -92,6 +92,46 @@ exports.getProfil = (req, res) => {
   });
 };
 
+exports.updateProfil = (req, res) => {
+  const { id: idUser } = req.authUser;
+  const id = parseInt(idUser);
+
+  modelUsers.getUserById(id, (error) => {
+    if (!error) {
+      const data = req.body;
+      const column = Object.keys(data);
+      const length = column.length;
+      console.log(length);
+      return standardResponse(res, 200, true, "Okay");
+
+      // const { photo, name, email, name_shown, gender, phone, address } =
+      //   req.body || null;
+
+      // const data = {
+      //   id,
+      //   photo,
+      //   name,
+      //   email,
+      //   name_shown,
+      //   gender,
+      //   phone,
+      //   address,
+      // };
+      // modelUsers.updateProfil(data, (error) => {
+      //   if (!error) {
+      //     return standardResponse(res, 200, true, "Data updating successful!");
+      //   } else {
+      //     console.log(error);
+      //     return standardResponse(res, 400, false, "Data failed to update!");
+      //   }
+      // });
+    } else {
+      console.log(error);
+      return standardResponse(res, 404, false, "Data not found!");
+    }
+  });
+};
+
 exports.deleteUser = (req, res) => {
   getUserRole(req.authUser.id, (error, results) => {
     if (!error) {
