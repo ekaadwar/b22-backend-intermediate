@@ -98,33 +98,42 @@ exports.updateProfil = (req, res) => {
 
   modelUsers.getUserById(id, (error) => {
     if (!error) {
-      const data = req.body;
-      const column = Object.keys(data);
-      const length = column.length;
-      console.log(length);
-      return standardResponse(res, 200, true, "Okay");
+      // const data = req.body;
+      // const column = Object.keys(data);
+      // const length = column.length;
+      // console.log(length);
+      // return standardResponse(res, 200, true, "Okay");
 
-      // const { photo, name, email, name_shown, gender, phone, address } =
-      //   req.body || null;
+      const {
+        photo,
+        name,
+        email,
+        name_shown,
+        birth_date,
+        gender,
+        phone,
+        address,
+      } = req.body || null;
 
-      // const data = {
-      //   id,
-      //   photo,
-      //   name,
-      //   email,
-      //   name_shown,
-      //   gender,
-      //   phone,
-      //   address,
-      // };
-      // modelUsers.updateProfil(data, (error) => {
-      //   if (!error) {
-      //     return standardResponse(res, 200, true, "Data updating successful!");
-      //   } else {
-      //     console.log(error);
-      //     return standardResponse(res, 400, false, "Data failed to update!");
-      //   }
-      // });
+      const data = {
+        id,
+        photo,
+        name,
+        email,
+        name_shown,
+        birth_date,
+        gender,
+        phone,
+        address,
+      };
+      modelUsers.updateProfil(data, (error) => {
+        if (!error) {
+          return standardResponse(res, 200, true, "Data updating successful!");
+        } else {
+          console.log(error);
+          return standardResponse(res, 400, false, "Data failed to update!");
+        }
+      });
     } else {
       console.log(error);
       return standardResponse(res, 404, false, "Data not found!");
