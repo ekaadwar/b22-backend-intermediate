@@ -85,7 +85,14 @@ exports.getUsers = (req, res) => {
 exports.getProfil = (req, res) => {
   modelUsers.getUserById(req.authUser.id, (error, results) => {
     if (!error) {
-      return standardResponse(res, 200, true, results);
+      // console.log(results);
+      return standardResponse(
+        res,
+        200,
+        true,
+        "Get Profile successfuly!",
+        results[0]
+      );
     } else {
       return standardResponse(res, 404, false, "Data not found!");
     }
