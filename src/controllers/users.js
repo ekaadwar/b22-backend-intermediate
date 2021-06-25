@@ -114,6 +114,8 @@ exports.updateProfil = (req, res) => {
       const {
         photo,
         name,
+        name_first,
+        name_last,
         email,
         name_shown,
         birth_date,
@@ -126,6 +128,8 @@ exports.updateProfil = (req, res) => {
         id,
         photo,
         name,
+        name_first,
+        name_last,
         email,
         name_shown,
         birth_date,

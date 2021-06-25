@@ -13,7 +13,6 @@ exports.createTransaction = (req, res) => {
     data.items_id = [data.items_id];
     data.items_amount = [data.items_amount];
   }
-
   getItemsById(
     data.items_id.map((id) => parseInt(id)),
     (error, items) => {
@@ -23,6 +22,7 @@ exports.createTransaction = (req, res) => {
         const total = items
           .map((item, index) => item.price * data.items_amount[index])
           .reduce((acc, curr) => acc + curr);
+        console.log(items);
 
         const tax = (total * 10) / 100;
         const shippingCost = 10000;
