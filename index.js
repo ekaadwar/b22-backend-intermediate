@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
+const port = process.env.PORT || 8080;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -37,6 +38,6 @@ app.use("/auth", routeAuth);
 app.use("/users", routeUsers);
 app.use("/private", auth, routeTransactions);
 
-app.listen(8080, () => {
+app.listen(port, () => {
   console.log("App running ini port 8080");
 });

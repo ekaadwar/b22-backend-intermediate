@@ -8,6 +8,7 @@ const { getUserById } = require("../models/users");
 exports.createTransaction = (req, res) => {
   // const code = codeTransaction(APP_TRANSACTION_PREFIX, 0);
   const data = req.body;
+  
 
   if (typeof data.item_id === "string") {
     data.items_id = [data.items_id];

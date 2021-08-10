@@ -2,7 +2,7 @@ node_modules/
 error/
 toDoList/
 
-.env
+#.env
 
 testing.js
 dailyStandUp.txt
