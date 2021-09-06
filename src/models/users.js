@@ -14,6 +14,7 @@ exports.createUsers = (data, cb) => {
 };
 
 exports.getUserById = (id, cb) => {
+  console.log(id);
   connection.query(
     `SELECT id, photo, name, email, name_shown, name_first, name_last, birth_date, gender, phone, address FROM ${table} WHERE id=${id}`,
     cb

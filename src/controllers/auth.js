@@ -19,6 +19,7 @@ exports.register = async (req, res) => {
 
 exports.login = (req, res) => {
   const { email, password } = req.body;
+  // console.log(req.body);
   modelUsers.getUserByEmail(email, async (error, results) => {
     if (!error) {
       if (results.length > 0) {

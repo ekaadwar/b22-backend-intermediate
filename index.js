@@ -29,6 +29,8 @@ const routeVari = require("./src/routes/variants");
 const routeAuth = require("./src/routes/auth");
 const routeUsers = require("./src/routes/users");
 const routeTransactions = require("./src/routes/transactions");
+const routeChats = require("./src/routes/chats");
+
 const auth = require("./src/middleware/auth");
 
 app.use("/items", routeItems);
@@ -37,6 +39,7 @@ app.use("/variants", routeVari);
 app.use("/auth", routeAuth);
 app.use("/users", routeUsers);
 app.use("/private", auth, routeTransactions);
+app.use("/chats", routeChats);
 
 app.listen(port, () => {
   console.log("App running ini port 8080");
