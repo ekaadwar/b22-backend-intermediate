@@ -1,9 +1,11 @@
-const { login, register } = require("../src/controller/auth");
+const { expect, should, assert } = require("chai");
 const sinon = require("sinon");
 const supertest = require("supertest");
-const { APP_URL } = process.env;
-const { expect, should, assert } = require("chai");
+
+const { login, register } = require("../src/controllers/auth");
 const { response } = require("../src/helpers/standardResponse");
+
+const { APP_URL } = process.env;
 
 const mockingResponse = () => {
   const res = {};
@@ -23,7 +25,6 @@ describe("Auth: Login function", () => {
 
     let res = mockingResponse();
 
-    const res = mockingResponse();
     login(req, res)
       .then((data) => {
         expect(data.json.args[0][0].success).to.be.false;
