@@ -5,6 +5,7 @@ toDoList/
 .env
 
 testing.js
+report.txt
 dailyStandUp.txt
 databaseStructure.xlsx
 ~$databaseStructure.xlsx
