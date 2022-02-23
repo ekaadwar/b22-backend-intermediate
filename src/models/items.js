@@ -20,7 +20,7 @@ exports.getItemByCond = (cond, cb) => {
   const sort = cond.sort[orderBy];
   db.query(
     `
-  SELECT items.id, items.name, items.price, categories.name AS category_name, items.created_at, items.updated_at 
+  SELECT items.id, items.picture, items.name, items.price, categories.name AS category_name, items.created_at, items.updated_at 
   FROM items LEFT JOIN categories ON items.category_id = categories.id 
   WHERE items.name LIKE '%${cond.search}%' 
   ORDER BY items.${orderBy} ${sort}

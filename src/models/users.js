@@ -5,10 +5,10 @@ const table = "users";
 exports.createUsers = (data, cb) => {
   connection.query(
     `
-    INSERT INTO ${table} (name, email, password)
-    VALUES (?, ?, ?)
+    INSERT INTO ${table} (email, password, mobile_number, display_name)
+    VALUES (?, ?, ?, ?)
     `,
-    [data.name, data.email, data.password],
+    [data.email, data.password, data.mobileNumber, data.name],
     cb
   );
 };
@@ -42,20 +42,21 @@ exports.getUsers = (cb) => {
 exports.getUsersByCond = (cond, cb) => {
   const orderBy = Object.keys(cond.sort)[0];
   const sort = cond.sort[orderBy];
-  connection.query(
+  const connect = connection.query(
     `
-  SELECT role, photo, name, email, password 
-  FROM ${table} WHERE ${table}.name LIKE '%${cond.search}%' 
+  SELECT role, photo, display_name, email, password 
+  FROM ${table} WHERE ${table}.display_name LIKE '%${cond.search}%' 
   ORDER BY ${table}.${orderBy} ${sort}
   LIMIT ? OFFSET ?`,
     [cond.limit, cond.offset],
     cb
   );
+  console.log(connect.sql);
 };
 
 exports.getUsersCount = (cond, cb) => {
   connection.query(
-    `SELECT COUNT (${table}.id) as count FROM ${table} WHERE ${table}.name LIKE '%${cond.search}%'`,
+    `SELECT COUNT (${table}.id) as count FROM ${table} WHERE ${table}.display_name LIKE '%${cond.search}%'`,
     cb
   );
 };

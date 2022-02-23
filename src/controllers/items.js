@@ -51,8 +51,8 @@ exports.getItems = (req, res) => {
   const condition = req.query;
   condition.search = condition.search || "";
   condition.sort = condition.sort || {};
-  condition.sort.name = condition.sort.name || "ASC";
-  condition.limit = parseInt(condition.limit) || 12;
+  condition.sort.created_at = condition.sort.type || "ASC";
+  condition.limit = parseInt(condition.limit) || 8;
   condition.offset = parseInt(condition.offset) || 0;
   condition.page = parseInt(condition.page) || 1;
 
@@ -65,20 +65,23 @@ exports.getItems = (req, res) => {
       modelItems.getItemsCount(condition, (error, resultCount) => {
         if (!error) {
           const totalData = resultCount[0].count;
-          const lastPage = Math.ceil(totalData / condition.limit);
+          const totalPage = Math.ceil(totalData / condition.limit);
 
           pageInfo.totalData = totalData;
           pageInfo.currentPage = condition.page;
-          pageInfo.lastPage = lastPage;
+          pageInfo.totalPage = totalPage;
           pageInfo.limit = condition.limit;
+
           pageInfo.nextPage =
-            condition.page < lastPage
+            condition.page < totalPage
               ? `${APP_URL}/items/?page=${pageInfo.currentPage + 1}`
               : null;
+
           pageInfo.prevPage =
             condition.page > 1
               ? `${APP_URL}/items/?page=${pageInfo.currentPage - 1}`
               : null;
+
           return standardResponse(
             res,
             200,
@@ -89,12 +92,24 @@ exports.getItems = (req, res) => {
           );
         } else {
           console.log(error);
-          return standardResponse(res, 404, false, "Data not found!", results);
+          return standardResponse(
+            res,
+            404,
+            false,
+            `data not found! error : ${error.sqlMessage}`,
+            results
+          );
         }
       });
     } else {
       console.log(error);
-      return standardResponse(res, 404, false, "Data not found!", results);
+      return standardResponse(
+        res,
+        404,
+        false,
+        `an error occured : ${error.sqlMessage}`,
+        results
+      );
     }
   });
 };
@@ -118,7 +133,12 @@ exports.detailItems = (req, res) => {
       );
     } else {
       console.log(error);
-      return standardResponse(res, 500, false, "Data can't read by id!");
+      return standardResponse(
+        res,
+        500,
+        false,
+        `Get details item failed. Error: ${error.sqlMessage}`
+      );
     }
   });
 };

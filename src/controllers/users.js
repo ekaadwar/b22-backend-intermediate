@@ -10,7 +10,7 @@ exports.getUsers = (req, res) => {
         const condition = req.query;
         condition.search = condition.search || "";
         condition.sort = condition.sort || {};
-        condition.sort.name = condition.sort.name || "ASC";
+        condition.sort.display_name = condition.sort.display_name || "ASC";
         condition.limit = parseInt(condition.limit) || 5;
         condition.offset = parseInt(condition.offset) || 0;
         condition.page = parseInt(condition.page) || 1;
@@ -19,7 +19,7 @@ exports.getUsers = (req, res) => {
 
         let pageInfo = {};
 
-        modelUsers.getUsersByCond(condition, (error, results) => {
+        modelUsers.getUsersByCond(condition, (error, resultUser) => {
           if (!error) {
             modelUsers.getUsersCount(condition, (error, resultCount) => {
               if (!error) {
@@ -43,7 +43,7 @@ exports.getUsers = (req, res) => {
                   200,
                   true,
                   "Search data succesfully",
-                  results,
+                  resultUser,
                   pageInfo
                 );
               } else {
@@ -63,7 +63,7 @@ exports.getUsers = (req, res) => {
               res,
               404,
               false,
-              "Data not found!",
+              "An error occured",
               results
             );
           }
@@ -77,7 +77,8 @@ exports.getUsers = (req, res) => {
         );
       }
     } else {
-      return standardResponse(res, 500, false, "An error occured!");
+      console.log(error);
+      return standardResponse(res, 500, false, `Error : ${error.sqlMessage}`);
     }
   });
 };

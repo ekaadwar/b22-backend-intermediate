@@ -7,12 +7,20 @@ const modelUsers = require(`../models/users`);
 exports.register = async (req, res) => {
   const data = req.body;
   data.password = await bcrypt.hash(data.password, await bcrypt.genSalt());
+  data.name = data.email.split(`@`)[0];
+
+  console.log(data);
   modelUsers.createUsers(data, (error) => {
     if (!error) {
       return response(res, 200, true, "Register successfully!");
     } else {
       console.log(error);
-      return response(res, 500, true, "Register failed!");
+      return response(
+        res,
+        500,
+        false,
+        `Register failed! Error : ${error.sqlMessage}. sql : ${error.sql}`
+      );
     }
   });
 };
@@ -30,7 +38,7 @@ exports.login = (req, res) => {
           const token = jwt.sign(payload, process.env.APP_KEY);
           response(res, 200, true, "Welcome!", { userId, token });
         } else {
-          response(res, 404, false, "Email or Password is wrong!");
+          response(res, 401, false, "Email or Password is wrong!");
         }
       } else {
         console.log(error);
