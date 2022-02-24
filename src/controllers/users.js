@@ -84,6 +84,7 @@ exports.getUsers = (req, res) => {
 };
 
 exports.getProfil = (req, res) => {
+  console.log(req.authUser.id);
   modelUsers.getUserById(req.authUser.id, (error, results) => {
     if (!error) {
       // console.log(results);
@@ -95,7 +96,56 @@ exports.getProfil = (req, res) => {
         results[0]
       );
     } else {
-      return standardResponse(res, 404, false, "Data not found!");
+      return standardResponse(
+        res,
+        404,
+        false,
+        `Data not found! error : ${error.sqlMessage}`
+      );
+    }
+  });
+};
+
+exports.updateProfilePart = (req, res) => {
+  const { id: idUser } = req.authUser;
+  const id = parseInt(idUser);
+  const column = Object.keys(req.body);
+  const value = Object.values(req.body);
+  const countCol = column.length;
+
+  modelUsers.getUserById(id, (error) => {
+    if (!error) {
+      for (let i = 0; i < countCol; i++) {
+        const col = column[i];
+        const val = value[i];
+        const data = { id, col, val };
+
+        modelUsers.updateProfilePart(data, (errorUpdate) => {
+          if (!errorUpdate) {
+            return standardResponse(
+              res,
+              200,
+              true,
+              "data update partially successful"
+            );
+          } else {
+            console.log(`error = ${error}`);
+            return standardResponse(
+              res,
+              404,
+              false,
+              `Partial data update failed! error : ${error}`
+            );
+          }
+        });
+      }
+    } else {
+      return standardResponse(
+        res,
+        404,
+        false,
+        `Data not found! error : ${error.sqlMessage}`
+      );
     }
   });
 };
@@ -106,38 +156,29 @@ exports.updateProfil = (req, res) => {
 
   modelUsers.getUserById(id, (error) => {
     if (!error) {
-      // const data = req.body;
-      // const column = Object.keys(data);
-      // const length = column.length;
-      // console.log(length);
-      // return standardResponse(res, 200, true, "Okay");
-
       const {
-        photo,
+        // photo,
         name,
-        name_first,
-        name_last,
-        email,
-        name_shown,
-        birth_date,
-        gender,
-        phone,
+        mobile_number,
         address,
-      } = req.body || null;
+        first_name,
+        last_name,
+        gender,
+        birth,
+      } = req.body;
 
       const data = {
         id,
-        photo,
+        // photo,
         name,
-        name_first,
-        name_last,
-        email,
-        name_shown,
-        birth_date,
-        gender,
-        phone,
+        mobile_number,
         address,
+        first_name,
+        last_name,
+        gender,
+        birth,
       };
+
       modelUsers.updateProfil(data, (error) => {
         if (!error) {
           return standardResponse(res, 200, true, "Data updating successful!");

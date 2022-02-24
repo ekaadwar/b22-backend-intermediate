@@ -15,7 +15,7 @@ exports.createUsers = (data, cb) => {
 
 exports.getUserById = (id, cb) => {
   connection.query(
-    `SELECT id, photo, name, email, name_shown, name_first, name_last, birth_date, gender, phone, address FROM ${table} WHERE id=${id}`,
+    `SELECT id, photo, display_name, email, first_name, last_name, birth, gender, mobile_number, address FROM ${table} WHERE id=${id}`,
     cb
   );
 };
@@ -61,24 +61,49 @@ exports.getUsersCount = (cond, cb) => {
   );
 };
 
+// exports.updateProfil = (data, cb) => {
+//   connection.query(
+//     `UPDATE ${table} SET photo=?, name=?, name_first=?, name_last=?, email=?, name_shown=?, birth_date=?, gender=?, phone=?, address=? WHERE id=?`,
+//     [
+//       data.photo,
+//       data.name,
+//       data.name_first,
+//       data.name_last,
+//       data.email,
+//       data.name_shown,
+//       data.birth_date,
+//       data.gender,
+//       data.phone,
+//       data.address,
+//       data.id,
+//     ],
+//     cb
+//   );
+// };
+
 exports.updateProfil = (data, cb) => {
   connection.query(
-    `UPDATE ${table} SET photo=?, name=?, name_first=?, name_last=?, email=?, name_shown=?, birth_date=?, gender=?, phone=?, address=? WHERE id=?`,
+    `UPDATE ${table} SET display_name=?, mobile_number=?, address=?, first_name=?, last_name=?, gender=?, birth=? WHERE id=?`,
     [
-      data.photo,
       data.name,
-      data.name_first,
-      data.name_last,
-      data.email,
-      data.name_shown,
-      data.birth_date,
-      data.gender,
-      data.phone,
+      data.mobile_number,
       data.address,
+      data.first_name,
+      data.last_name,
+      data.gender,
+      data.birth,
       data.id,
     ],
     cb
   );
+};
+
+exports.updateProfilePart = (data, cb) => {
+  const sql = `UPDATE ${table} SET ${data.col}='${data.val}' WHERE id=${data.id}`;
+
+  console.log(sql);
+
+  connection.query(sql, cb);
 };
 
 exports.deleteUser = (data, cb) => {
