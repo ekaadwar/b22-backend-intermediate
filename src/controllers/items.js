@@ -10,16 +10,30 @@ exports.insertItems = (req, res) => {
       if (results[0].role === "admin") {
         itemPicture(req, res, (error) => {
           if (error) throw error;
+
           req.body.picture =
             `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
-          modelItems.insertItems(req.body, (error) => {
+
+          // console.log(req.file);
+          // req.body.picture = null;
+
+          modelItems.insertItems(req.body, (error, results) => {
             if (!error) {
-              return standardResponse(
-                res,
-                200,
-                true,
-                "Data has been inserted succesfully!"
-              );
+              if (results.affectedRows) {
+                return standardResponse(
+                  res,
+                  200,
+                  true,
+                  "Data has been inserted succesfully!"
+                );
+              } else {
+                return standardResponse(
+                  res,
+                  400,
+                  false,
+                  "Failed to created items"
+                );
+              }
             } else {
               return standardResponse(
                 res,
@@ -31,7 +45,7 @@ exports.insertItems = (req, res) => {
           });
         });
       } else {
-        console.log(results.role[0]);
+        console.log(error);
         return standardResponse(
           res,
           400,
