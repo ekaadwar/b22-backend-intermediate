@@ -47,7 +47,6 @@ exports.getUsers = (req, res) => {
                   pageInfo
                 );
               } else {
-                console.log(error);
                 return standardResponse(
                   res,
                   404,
@@ -58,7 +57,6 @@ exports.getUsers = (req, res) => {
               }
             });
           } else {
-            console.log(error);
             return standardResponse(
               res,
               404,
@@ -77,17 +75,14 @@ exports.getUsers = (req, res) => {
         );
       }
     } else {
-      console.log(error);
       return standardResponse(res, 500, false, `Error : ${error.sqlMessage}`);
     }
   });
 };
 
 exports.getProfil = (req, res) => {
-  console.log(req.authUser.id);
   modelUsers.getUserById(req.authUser.id, (error, results) => {
     if (!error) {
-      // console.log(results);
       return standardResponse(
         res,
         200,
@@ -129,7 +124,6 @@ exports.updateProfilePart = (req, res) => {
               "data update partially successful"
             );
           } else {
-            console.log(`error = ${error}`);
             return standardResponse(
               res,
               404,
@@ -183,12 +177,14 @@ exports.updateProfil = (req, res) => {
         if (!error) {
           return standardResponse(res, 200, true, "Data updating successful!");
         } else {
-          console.log(error);
-          return standardResponse(res, 400, false, "Data failed to update!");
+          let message = "Data failed to update!";
+          if (!data.mobile_number) {
+            message = "Mobile number column cannot be empty";
+          }
+          return standardResponse(res, 400, false, message);
         }
       });
     } else {
-      console.log(error);
       return standardResponse(res, 404, false, "Data not found!");
     }
   });
@@ -212,7 +208,6 @@ exports.deleteUser = (req, res) => {
                     "Data has been deleted"
                   );
                 } else {
-                  console.log(error);
                   return standardResponse(
                     res,
                     500,
@@ -227,11 +222,9 @@ exports.deleteUser = (req, res) => {
           }
         });
       } else {
-        console.log(results[0].role);
         return standardResponse(res, 400, false, "You have no authority!");
       }
     } else {
-      console.log(error);
       return standardResponse(res, 400, false, "An error occured!");
     }
   });

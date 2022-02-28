@@ -42,7 +42,7 @@ exports.getUsers = (cb) => {
 exports.getUsersByCond = (cond, cb) => {
   const orderBy = Object.keys(cond.sort)[0];
   const sort = cond.sort[orderBy];
-  const connect = connection.query(
+  connection.query(
     `
   SELECT role, photo, display_name, email, password 
   FROM ${table} WHERE ${table}.display_name LIKE '%${cond.search}%' 
@@ -51,7 +51,7 @@ exports.getUsersByCond = (cond, cb) => {
     [cond.limit, cond.offset],
     cb
   );
-  console.log(connect.sql);
+  // console.log(connect.sql);
 };
 
 exports.getUsersCount = (cond, cb) => {
@@ -60,26 +60,6 @@ exports.getUsersCount = (cond, cb) => {
     cb
   );
 };
-
-// exports.updateProfil = (data, cb) => {
-//   connection.query(
-//     `UPDATE ${table} SET photo=?, name=?, name_first=?, name_last=?, email=?, name_shown=?, birth_date=?, gender=?, phone=?, address=? WHERE id=?`,
-//     [
-//       data.photo,
-//       data.name,
-//       data.name_first,
-//       data.name_last,
-//       data.email,
-//       data.name_shown,
-//       data.birth_date,
-//       data.gender,
-//       data.phone,
-//       data.address,
-//       data.id,
-//     ],
-//     cb
-//   );
-// };
 
 exports.updateProfil = (data, cb) => {
   connection.query(
