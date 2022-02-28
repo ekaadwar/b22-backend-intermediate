@@ -9,40 +9,41 @@ exports.insertItems = (req, res) => {
     if (!error) {
       if (results[0].role === "admin") {
         itemPicture(req, res, (error) => {
-          if (error) throw error;
+          if (!error) {
+            req.body.picture = req.file
+              ? `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`
+              : null;
 
-          req.body.picture =
-            `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
-
-          // console.log(req.file);
-          // req.body.picture = null;
-
-          modelItems.insertItems(req.body, (error, results) => {
-            if (!error) {
-              if (results.affectedRows) {
-                return standardResponse(
-                  res,
-                  200,
-                  true,
-                  "Data has been inserted succesfully!"
-                );
+            modelItems.insertItems(req.body, (error, results) => {
+              if (!error) {
+                if (results.affectedRows) {
+                  return standardResponse(
+                    res,
+                    200,
+                    true,
+                    "Data has been inserted succesfully!"
+                  );
+                } else {
+                  return standardResponse(
+                    res,
+                    400,
+                    false,
+                    "Failed to created items"
+                  );
+                }
               } else {
                 return standardResponse(
                   res,
-                  400,
+                  500,
                   false,
-                  "Failed to created items"
+                  "Data insertion has failed!"
                 );
               }
-            } else {
-              return standardResponse(
-                res,
-                500,
-                false,
-                "Data insertion has failed!"
-              );
-            }
-          });
+            });
+          } else {
+            console.log("error");
+            return standardResponse(res, 500, false, `Error`);
+          }
         });
       } else {
         console.log(error);
@@ -132,19 +133,22 @@ exports.detailItems = (req, res) => {
   const { id } = req.params;
   modelItems.getItemById(id, (error, results) => {
     if (!error) {
-      const item = results[0];
-      // console.log(item.picture);
-      if (item.picture !== null && !item.picture.startsWith("http")) {
-        item.picture = `${process.env.APP_URL}${item.picture}`;
-      }
+      if (results.length > 0) {
+        const item = results[0];
+        if (item.picture !== null && !item.picture.startsWith("http")) {
+          item.picture = `${process.env.APP_URL}${item.picture}`;
+        }
 
-      return standardResponse(
-        res,
-        200,
-        true,
-        "Data read successfully by id!",
-        item
-      );
+        return standardResponse(
+          res,
+          200,
+          true,
+          "Data read successfully by id!",
+          item
+        );
+      } else {
+        return standardResponse(res, 404, false, "Data not found!");
+      }
     } else {
       console.log(error);
       return standardResponse(
