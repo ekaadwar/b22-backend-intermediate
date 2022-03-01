@@ -117,22 +117,19 @@ exports.updateProfilePart = (req, res) => {
 
         modelUsers.updateProfilePart(data, (errorUpdate) => {
           if (!errorUpdate) {
-            return standardResponse(
-              res,
-              200,
-              true,
-              "data update partially successful"
-            );
+            console.log(`${col} column has been successfully updated`);
           } else {
-            return standardResponse(
-              res,
-              404,
-              false,
-              `Partial data update failed! error : ${error}`
-            );
+            console.log(`${col} column has been failed to update`);
           }
         });
       }
+
+      return standardResponse(
+        res,
+        200,
+        true,
+        "the update process has been completed"
+      );
     } else {
       return standardResponse(
         res,
