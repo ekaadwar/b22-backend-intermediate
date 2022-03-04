@@ -248,47 +248,60 @@ exports.updateItem = (req, res) => {
     if (!error) {
       if (results[0].role === "admin") {
         const { id } = req.params;
-        modelItems.getItemById(id, (error) => {
+        modelItems.getItemById(id, (error, results) => {
           if (!error) {
-            itemPicture(req, res, (error) => {
-              if (!error) {
-                const { name, price } = req.body;
-                const categoryId = parseInt(req.body.category_id);
+            if (results.length > 0) {
+              itemPicture(req, res, (error) => {
+                if (!error) {
+                  const { name, price } = req.body;
+                  const categoryId = parseInt(req.body.category_id);
 
-                req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
-                const { picture } = req.body;
+                  req.body.picture =
+                    req.file &&
+                    `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+                  const { picture } = req.body;
 
-                const dataUpdate = { id, picture, name, price, categoryId };
+                  const dataUpdate = { id, picture, name, price, categoryId };
 
-                modelItems.updateItem(dataUpdate, (error) => {
-                  if (!error) {
-                    return standardResponse(
-                      res,
-                      200,
-                      true,
-                      "Data has been updated"
-                    );
-                  } else {
-                    console.log(error);
-                    return standardResponse(
-                      res,
-                      500,
-                      false,
-                      "Data can't update!"
-                    );
-                  }
-                });
-              } else {
-                console.log(error);
-                return standardResponse(res, 500, false, "Error occured!");
-              }
-            });
+                  modelItems.updateItem(dataUpdate, (error) => {
+                    if (!error) {
+                      const path = "assets" + results[0].picture;
+
+                      fs.unlink(path, (error) => {
+                        if (error) throw error;
+                        console.log(`${path} has been deleted`);
+                      });
+
+                      return standardResponse(
+                        res,
+                        200,
+                        true,
+                        "Data has been updated"
+                      );
+                    } else {
+                      console.log(error);
+                      return standardResponse(
+                        res,
+                        500,
+                        false,
+                        "Data can't update!"
+                      );
+                    }
+                  });
+                } else {
+                  console.log(error);
+                  return standardResponse(res, 500, false, "Error occured!");
+                }
+              });
+            } else {
+              return standardResponse(res, 404, false, "Data not found!");
+            }
           } else {
             return standardResponse(
               res,
-              404,
+              500,
               false,
-              "The data you want to change is not found!"
+              "An error occure when get data by id"
             );
           }
         });
