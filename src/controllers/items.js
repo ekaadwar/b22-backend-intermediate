@@ -3,6 +3,7 @@ const { getUserRole } = require("../models/users");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const { APP_URL } = process.env;
 const itemPicture = require("../helpers/upload").single("picture");
+const fs = require("fs");
 
 exports.insertItems = (req, res) => {
   getUserRole(req.authUser.id, (error, results) => {
@@ -169,37 +170,61 @@ exports.updatePartial = (req, res) => {
         modelItems.getItemById(id, (error, results) => {
           if (!error) {
             if (results.length > 0) {
-              const key = Object.keys(req.body);
-              if (key.length == 1) {
-                const firstColumn = key[0];
-                const dataUpdate = { id, [firstColumn]: req.body[firstColumn] };
-                modelItems.updateItemPartial(dataUpdate, (error) => {
-                  if (!error) {
-                    return standardResponse(
-                      res,
-                      200,
-                      true,
-                      "Data has been updated"
-                    );
+              itemPicture(req, res, (error) => {
+                if (!error) {
+                  if (req.file) {
+                    const path = `assets${results[0].picture}`;
+                    fs.unlink(path, (error) => {
+                      if (error) throw error;
+                      console.log(`${path} has been deleted`);
+                    });
+                    req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+                  }
+
+                  console.log(req.body.picture);
+
+                  const key = Object.keys(req.body);
+                  if (key.length == 1) {
+                    const firstColumn = key[0];
+                    const dataUpdate = {
+                      id,
+                      [firstColumn]: req.body[firstColumn],
+                    };
+                    modelItems.updateItemPartial(dataUpdate, (error) => {
+                      if (!error) {
+                        return standardResponse(
+                          res,
+                          200,
+                          true,
+                          "Data has been updated"
+                        );
+                      } else {
+                        console.log(error);
+                        return standardResponse(
+                          res,
+                          500,
+                          false,
+                          "Data can't update!"
+                        );
+                      }
+                    });
                   } else {
-                    console.log(error);
                     return standardResponse(
                       res,
-                      500,
+                      400,
                       false,
-                      "Data can't update!"
+                      "data's input must single data"
                     );
                   }
-                });
-              } else {
-                console.log("data's input must single data");
-                return standardResponse(
-                  res,
-                  400,
-                  false,
-                  "data's input must single data"
-                );
-              }
+                } else {
+                  return standardResponse(
+                    res,
+                    500,
+                    false,
+                    "Error occured when uploading file"
+                  );
+                }
+              });
             } else {
               return standardResponse(res, 404, false, "Data not found!");
             }
