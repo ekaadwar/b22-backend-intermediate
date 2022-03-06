@@ -173,11 +173,13 @@ exports.updatePartial = (req, res) => {
               itemPicture(req, res, (error) => {
                 if (!error) {
                   if (req.file) {
-                    const path = `assets${results[0].picture}`;
-                    fs.unlink(path, (error) => {
-                      if (error) throw error;
-                      console.log(`${path} has been deleted`);
-                    });
+                    if (results[0].picture !== null) {
+                      const path = `assets${results[0].picture}`;
+                      fs.unlink(path, (error) => {
+                        if (error) throw error;
+                        console.log(`${path} has been deleted`);
+                      });
+                    }
                     req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
                   }
 

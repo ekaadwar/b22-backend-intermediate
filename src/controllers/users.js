@@ -1,6 +1,8 @@
+const fs = require("fs");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const modelUsers = require("../models/users");
 const { getUserRole } = require("../models/users");
+const itemPicture = require("../helpers/upload").single("photo");
 const { APP_URL } = process.env;
 
 exports.getUsers = (req, res) => {
@@ -102,40 +104,70 @@ exports.getProfil = (req, res) => {
 };
 
 exports.updateProfilePart = (req, res) => {
-  const { id: idUser } = req.authUser;
-  const id = parseInt(idUser);
-  const column = Object.keys(req.body);
-  const value = Object.values(req.body);
-  const countCol = column.length;
-
-  modelUsers.getUserById(id, (error) => {
+  itemPicture(req, res, (error) => {
     if (!error) {
-      for (let i = 0; i < countCol; i++) {
-        const col = column[i];
-        const val = value[i];
-        const data = { id, col, val };
+      const { id: idUser } = req.authUser;
+      const id = parseInt(idUser);
 
-        modelUsers.updateProfilePart(data, (errorUpdate) => {
-          if (!errorUpdate) {
-            console.log(`${col} column has been successfully updated`);
-          } else {
-            console.log(`${col} column has been failed to update`);
+      modelUsers.getUserById(id, (error, results) => {
+        if (!error) {
+          if (req.file) {
+            console.log(results[0]);
+            if (results[0].photo !== null) {
+              const path = `assets${results[0].photo}`;
+              fs.unlink(path, (error) => {
+                if (error) throw error;
+                console.log(`${path} has been deleted`);
+              });
+            }
+
+            req.body.photo = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
           }
-        });
-      }
 
-      return standardResponse(
-        res,
-        200,
-        true,
-        "the update process has been completed"
-      );
+          const column = Object.keys(req.body);
+          const value = Object.values(req.body);
+          const countColumn = column.length;
+
+          if (countColumn > 0) {
+            for (let i = 0; i < countColumn; i++) {
+              const col = column[i];
+              const val = value[i];
+              const data = { id, col, val };
+
+              modelUsers.updateProfilePart(data, (errorUpdate) => {
+                if (!errorUpdate) {
+                  console.log(`${col} column has been successfully updated`);
+                } else {
+                  console.log(`${col} column has been failed to update`);
+                }
+              });
+            }
+
+            return standardResponse(
+              res,
+              200,
+              true,
+              "the update process has been completed"
+            );
+          } else {
+            return standardResponse(res, 400, false, "you have to enter data!");
+          }
+        } else {
+          return standardResponse(
+            res,
+            404,
+            false,
+            `Data not found! error : ${error.sqlMessage}`
+          );
+        }
+      });
     } else {
+      console.log(error);
       return standardResponse(
         res,
-        404,
+        400,
         false,
-        `Data not found! error : ${error.sqlMessage}`
+        "an error occured when uploading process"
       );
     }
   });
