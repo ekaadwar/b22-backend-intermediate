@@ -115,10 +115,15 @@ exports.updateProfilePart = (req, res) => {
             console.log(results[0]);
             if (results[0].photo !== null) {
               const path = `assets${results[0].photo}`;
-              fs.unlink(path, (error) => {
-                if (error) throw error;
-                console.log(`${path} has been deleted`);
-              });
+
+              if (fs.existsSync(path)) {
+                fs.unlink(path, (error) => {
+                  if (error) throw error;
+                  console.log(`${path} has been deleted`);
+                });
+              } else {
+                console.log("Previous photo is doesn't exists! ");
+              }
             }
 
             req.body.photo = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
@@ -177,40 +182,72 @@ exports.updateProfil = (req, res) => {
   const { id: idUser } = req.authUser;
   const id = parseInt(idUser);
 
-  modelUsers.getUserById(id, (error) => {
+  modelUsers.getUserById(id, (error, results) => {
     if (!error) {
-      const {
-        // photo,
-        name,
-        mobile_number,
-        address,
-        first_name,
-        last_name,
-        gender,
-        birth,
-      } = req.body;
-
-      const data = {
-        id,
-        // photo,
-        name,
-        mobile_number,
-        address,
-        first_name,
-        last_name,
-        gender,
-        birth,
-      };
-
-      modelUsers.updateProfil(data, (error) => {
+      itemPicture(req, res, (error) => {
         if (!error) {
-          return standardResponse(res, 200, true, "Data updating successful!");
-        } else {
-          let message = "Data failed to update!";
-          if (!data.mobile_number) {
-            message = "Mobile number column cannot be empty";
+          if (req.file) {
+            const path = `assets${results[0].photo}`;
+            console.log(path);
+
+            if (fs.existsSync(path)) {
+              fs.unlink(path, (error) => {
+                if (error) throw error;
+                console.log(`${path} has been deleted`);
+              });
+            } else {
+              console.log("Previous photo is doesn't exists! ");
+            }
+
+            req.body.photo = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
           }
-          return standardResponse(res, 400, false, message);
+
+          const {
+            photo,
+            name,
+            mobile_number,
+            address,
+            first_name,
+            last_name,
+            gender,
+            birth,
+          } = req.body;
+
+          const data = {
+            id,
+            photo,
+            name,
+            mobile_number,
+            address,
+            first_name,
+            last_name,
+            gender,
+            birth,
+          };
+
+          modelUsers.updateProfil(data, (error) => {
+            if (!error) {
+              return standardResponse(
+                res,
+                200,
+                true,
+                "Data updating successful!"
+              );
+            } else {
+              let message = "Data failed to update!";
+              if (!data.mobile_number) {
+                message = "Mobile number column cannot be empty";
+              }
+              return standardResponse(res, 400, false, message);
+            }
+          });
+        } else {
+          return standardResponse(
+            res,
+            400,
+            false,
+            "An error occured when file upload process!"
+          );
         }
       });
     } else {

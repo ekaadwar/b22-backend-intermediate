@@ -63,8 +63,9 @@ exports.getUsersCount = (cond, cb) => {
 
 exports.updateProfil = (data, cb) => {
   connection.query(
-    `UPDATE ${table} SET display_name=?, mobile_number=?, address=?, first_name=?, last_name=?, gender=?, birth=? WHERE id=?`,
+    `UPDATE ${table} SET photo=?, display_name=?, mobile_number=?, address=?, first_name=?, last_name=?, gender=?, birth=? WHERE id=?`,
     [
+      data.photo,
       data.name,
       data.mobile_number,
       data.address,
