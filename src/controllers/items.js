@@ -4,35 +4,51 @@ const { getUserRole } = require("../models/users");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const { APP_URL } = process.env;
 const itemPicture = require("../helpers/upload").single("picture");
+const fs = require("fs");
 
 exports.insertItems = (req, res) => {
   getUserRole(req.authUser.id, (error, results) => {
     if (!error) {
       if (results[0].role === "admin") {
         itemPicture(req, res, (error) => {
-          if (error) throw error;
-          req.body.picture =
-            `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}` || null;
-          modelItems.insertItems(req.body, (error) => {
-            if (!error) {
-              return standardResponse(
-                res,
-                200,
-                true,
-                "Data has been inserted succesfully!"
-              );
-            } else {
-              return standardResponse(
-                res,
-                500,
-                false,
-                "Data insertion has failed!"
-              );
-            }
-          });
+          if (!error) {
+            req.body.picture = req.file
+              ? `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`
+              : null;
+
+            modelItems.insertItems(req.body, (error, results) => {
+              if (!error) {
+                if (results.affectedRows) {
+                  return standardResponse(
+                    res,
+                    200,
+                    true,
+                    "Data has been inserted succesfully!"
+                  );
+                } else {
+                  return standardResponse(
+                    res,
+                    400,
+                    false,
+                    "Failed to created items"
+                  );
+                }
+              } else {
+                return standardResponse(
+                  res,
+                  500,
+                  false,
+                  "Data insertion has failed!"
+                );
+              }
+            });
+          } else {
+            console.log("error");
+            return standardResponse(res, 500, false, `Error`);
+          }
         });
       } else {
-        console.log(results.role[0]);
+        console.log(error);
         return standardResponse(
           res,
           400,
@@ -52,8 +68,8 @@ exports.getItems = (req, res) => {
   const condition = req.query;
   condition.search = condition.search || "";
   condition.sort = condition.sort || {};
-  condition.sort.name = condition.sort.name || "ASC";
-  condition.limit = parseInt(condition.limit) || 12;
+  condition.sort.created_at = condition.sort.type || "ASC";
+  condition.limit = parseInt(condition.limit) || 8;
   condition.offset = parseInt(condition.offset) || 0;
   condition.page = parseInt(condition.page) || 1;
 
@@ -66,20 +82,23 @@ exports.getItems = (req, res) => {
       modelItems.getItemsCount(condition, (error, resultCount) => {
         if (!error) {
           const totalData = resultCount[0].count;
-          const lastPage = Math.ceil(totalData / condition.limit);
+          const totalPage = Math.ceil(totalData / condition.limit);
 
           pageInfo.totalData = totalData;
           pageInfo.currentPage = condition.page;
-          pageInfo.lastPage = lastPage;
+          pageInfo.totalPage = totalPage;
           pageInfo.limit = condition.limit;
+
           pageInfo.nextPage =
-            condition.page < lastPage
+            condition.page < totalPage
               ? `${APP_URL}/items/?page=${pageInfo.currentPage + 1}`
               : null;
+
           pageInfo.prevPage =
             condition.page > 1
               ? `${APP_URL}/items/?page=${pageInfo.currentPage - 1}`
               : null;
+
           return standardResponse(
             res,
             200,
@@ -90,12 +109,24 @@ exports.getItems = (req, res) => {
           );
         } else {
           console.log(error);
-          return standardResponse(res, 404, false, "Data not found!", results);
+          return standardResponse(
+            res,
+            404,
+            false,
+            `data not found! error : ${error.sqlMessage}`,
+            results
+          );
         }
       });
     } else {
       console.log(error);
-      return standardResponse(res, 404, false, "Data not found!", results);
+      return standardResponse(
+        res,
+        404,
+        false,
+        `an error occured : ${error.sqlMessage}`,
+        results
+      );
     }
   });
 };
@@ -104,22 +135,30 @@ exports.detailItems = (req, res) => {
   const { id } = req.params;
   modelItems.getItemById(id, (error, results) => {
     if (!error) {
-      const item = results[0];
-      // console.log(item.picture);
-      if (item.picture !== null && !item.picture.startsWith("http")) {
-        item.picture = `${process.env.APP_URL}${item.picture}`;
-      }
+      if (results.length > 0) {
+        const item = results[0];
+        if (item.picture !== null && !item.picture.startsWith("http")) {
+          item.picture = `${process.env.APP_URL}${item.picture}`;
+        }
 
-      return standardResponse(
-        res,
-        200,
-        true,
-        "Data read successfully by id!",
-        item
-      );
+        return standardResponse(
+          res,
+          200,
+          true,
+          "Data read successfully by id!",
+          item
+        );
+      } else {
+        return standardResponse(res, 404, false, "Data not found!");
+      }
     } else {
       console.log(error);
-      return standardResponse(res, 500, false, "Data can't read by id!");
+      return standardResponse(
+        res,
+        500,
+        false,
+        `Get details item failed. Error: ${error.sqlMessage}`
+      );
     }
   });
 };
@@ -132,37 +171,63 @@ exports.updatePartial = (req, res) => {
         modelItems.getItemById(id, (error, results) => {
           if (!error) {
             if (results.length > 0) {
-              const key = Object.keys(req.body);
-              if (key.length == 1) {
-                const firstColumn = key[0];
-                const dataUpdate = { id, [firstColumn]: req.body[firstColumn] };
-                modelItems.updateItemPartial(dataUpdate, (error) => {
-                  if (!error) {
-                    return standardResponse(
-                      res,
-                      200,
-                      true,
-                      "Data has been updated"
-                    );
+              itemPicture(req, res, (error) => {
+                if (!error) {
+                  if (req.file) {
+                    if (results[0].picture !== null) {
+                      const path = `assets${results[0].picture}`;
+                      fs.unlink(path, (error) => {
+                        if (error) throw error;
+                        console.log(`${path} has been deleted`);
+                      });
+                    }
+                    req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+                  }
+
+                  console.log(req.body.picture);
+
+                  const key = Object.keys(req.body);
+                  if (key.length == 1) {
+                    const firstColumn = key[0];
+                    const dataUpdate = {
+                      id,
+                      [firstColumn]: req.body[firstColumn],
+                    };
+                    modelItems.updateItemPartial(dataUpdate, (error) => {
+                      if (!error) {
+                        return standardResponse(
+                          res,
+                          200,
+                          true,
+                          "Data has been updated"
+                        );
+                      } else {
+                        console.log(error);
+                        return standardResponse(
+                          res,
+                          500,
+                          false,
+                          "Data can't update!"
+                        );
+                      }
+                    });
                   } else {
-                    console.log(error);
                     return standardResponse(
                       res,
-                      500,
+                      400,
                       false,
-                      "Data can't update!"
+                      "data's input must single data"
                     );
                   }
-                });
-              } else {
-                console.log("data's input must single data");
-                return standardResponse(
-                  res,
-                  400,
-                  false,
-                  "data's input must single data"
-                );
-              }
+                } else {
+                  return standardResponse(
+                    res,
+                    500,
+                    false,
+                    "Error occured when uploading file"
+                  );
+                }
+              });
             } else {
               return standardResponse(res, 404, false, "Data not found!");
             }
@@ -186,47 +251,60 @@ exports.updateItem = (req, res) => {
     if (!error) {
       if (results[0].role === "admin") {
         const { id } = req.params;
-        modelItems.getItemById(id, (error) => {
+        modelItems.getItemById(id, (error, results) => {
           if (!error) {
-            itemPicture(req, res, (error) => {
-              if (!error) {
-                const { name, price } = req.body;
-                const categoryId = parseInt(req.body.category_id);
+            if (results.length > 0) {
+              itemPicture(req, res, (error) => {
+                if (!error) {
+                  const { name, price } = req.body;
+                  const categoryId = parseInt(req.body.category_id);
 
-                req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
-                const { picture } = req.body;
+                  req.body.picture =
+                    req.file &&
+                    `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+                  const { picture } = req.body;
 
-                const dataUpdate = { id, picture, name, price, categoryId };
+                  const dataUpdate = { id, picture, name, price, categoryId };
 
-                modelItems.updateItem(dataUpdate, (error) => {
-                  if (!error) {
-                    return standardResponse(
-                      res,
-                      200,
-                      true,
-                      "Data has been updated"
-                    );
-                  } else {
-                    console.log(error);
-                    return standardResponse(
-                      res,
-                      500,
-                      false,
-                      "Data can't update!"
-                    );
-                  }
-                });
-              } else {
-                console.log(error);
-                return standardResponse(res, 500, false, "Error occured!");
-              }
-            });
+                  modelItems.updateItem(dataUpdate, (error) => {
+                    if (!error) {
+                      const path = "assets" + results[0].picture;
+
+                      fs.unlink(path, (error) => {
+                        if (error) throw error;
+                        console.log(`${path} has been deleted`);
+                      });
+
+                      return standardResponse(
+                        res,
+                        200,
+                        true,
+                        "Data has been updated"
+                      );
+                    } else {
+                      console.log(error);
+                      return standardResponse(
+                        res,
+                        500,
+                        false,
+                        "Data can't update!"
+                      );
+                    }
+                  });
+                } else {
+                  console.log(error);
+                  return standardResponse(res, 500, false, "Error occured!");
+                }
+              });
+            } else {
+              return standardResponse(res, 404, false, "Data not found!");
+            }
           } else {
             return standardResponse(
               res,
-              404,
+              500,
               false,
-              "The data you want to change is not found!"
+              "An error occure when get data by id"
             );
           }
         });

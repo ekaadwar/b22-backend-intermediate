@@ -1,6 +1,8 @@
+const fs = require("fs");
 const { response: standardResponse } = require("../helpers/standardResponse");
 const modelUsers = require("../models/users");
 const { getUserRole } = require("../models/users");
+const itemPicture = require("../helpers/upload").single("photo");
 const { APP_URL } = process.env;
 
 exports.getUsers = (req, res) => {
@@ -10,7 +12,7 @@ exports.getUsers = (req, res) => {
         const condition = req.query;
         condition.search = condition.search || "";
         condition.sort = condition.sort || {};
-        condition.sort.name = condition.sort.name || "ASC";
+        condition.sort.display_name = condition.sort.display_name || "ASC";
         condition.limit = parseInt(condition.limit) || 5;
         condition.offset = parseInt(condition.offset) || 0;
         condition.page = parseInt(condition.page) || 1;
@@ -19,7 +21,7 @@ exports.getUsers = (req, res) => {
 
         let pageInfo = {};
 
-        modelUsers.getUsersByCond(condition, (error, results) => {
+        modelUsers.getUsersByCond(condition, (error, resultUser) => {
           if (!error) {
             modelUsers.getUsersCount(condition, (error, resultCount) => {
               if (!error) {
@@ -43,11 +45,10 @@ exports.getUsers = (req, res) => {
                   200,
                   true,
                   "Search data succesfully",
-                  results,
+                  resultUser,
                   pageInfo
                 );
               } else {
-                console.log(error);
                 return standardResponse(
                   res,
                   404,
@@ -58,12 +59,11 @@ exports.getUsers = (req, res) => {
               }
             });
           } else {
-            console.log(error);
             return standardResponse(
               res,
               404,
               false,
-              "Data not found!",
+              "An error occured",
               results
             );
           }
@@ -77,7 +77,7 @@ exports.getUsers = (req, res) => {
         );
       }
     } else {
-      return standardResponse(res, 500, false, "An error occured!");
+      return standardResponse(res, 500, false, `Error : ${error.sqlMessage}`);
     }
   });
 };
@@ -85,7 +85,6 @@ exports.getUsers = (req, res) => {
 exports.getProfil = (req, res) => {
   modelUsers.getUserById(req.authUser.id, (error, results) => {
     if (!error) {
-      // console.log(results);
       return standardResponse(
         res,
         200,
@@ -94,7 +93,87 @@ exports.getProfil = (req, res) => {
         results[0]
       );
     } else {
-      return standardResponse(res, 404, false, "Data not found!");
+      return standardResponse(
+        res,
+        404,
+        false,
+        `Data not found! error : ${error.sqlMessage}`
+      );
+    }
+  });
+};
+
+exports.updateProfilePart = (req, res) => {
+  itemPicture(req, res, (error) => {
+    if (!error) {
+      const { id: idUser } = req.authUser;
+      const id = parseInt(idUser);
+
+      modelUsers.getUserById(id, (error, results) => {
+        if (!error) {
+          if (req.file) {
+            console.log(results[0]);
+            if (results[0].photo !== null) {
+              const path = `assets${results[0].photo}`;
+
+              if (fs.existsSync(path)) {
+                fs.unlink(path, (error) => {
+                  if (error) throw error;
+                  console.log(`${path} has been deleted`);
+                });
+              } else {
+                console.log("Previous photo is doesn't exists! ");
+              }
+            }
+
+            req.body.photo = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+          }
+
+          const column = Object.keys(req.body);
+          const value = Object.values(req.body);
+          const countColumn = column.length;
+
+          if (countColumn > 0) {
+            for (let i = 0; i < countColumn; i++) {
+              const col = column[i];
+              const val = value[i];
+              const data = { id, col, val };
+
+              modelUsers.updateProfilePart(data, (errorUpdate) => {
+                if (!errorUpdate) {
+                  console.log(`${col} column has been successfully updated`);
+                } else {
+                  console.log(`${col} column has been failed to update`);
+                }
+              });
+            }
+
+            return standardResponse(
+              res,
+              200,
+              true,
+              "the update process has been completed"
+            );
+          } else {
+            return standardResponse(res, 400, false, "you have to enter data!");
+          }
+        } else {
+          return standardResponse(
+            res,
+            404,
+            false,
+            `Data not found! error : ${error.sqlMessage}`
+          );
+        }
+      });
+    } else {
+      console.log(error);
+      return standardResponse(
+        res,
+        400,
+        false,
+        "an error occured when uploading process"
+      );
     }
   });
 };
@@ -103,50 +182,75 @@ exports.updateProfil = (req, res) => {
   const { id: idUser } = req.authUser;
   const id = parseInt(idUser);
 
-  modelUsers.getUserById(id, (error) => {
+  modelUsers.getUserById(id, (error, results) => {
     if (!error) {
-      // const data = req.body;
-      // const column = Object.keys(data);
-      // const length = column.length;
-      // console.log(length);
-      // return standardResponse(res, 200, true, "Okay");
-
-      const {
-        photo,
-        name,
-        name_first,
-        name_last,
-        email,
-        name_shown,
-        birth_date,
-        gender,
-        phone,
-        address,
-      } = req.body || null;
-
-      const data = {
-        id,
-        photo,
-        name,
-        name_first,
-        name_last,
-        email,
-        name_shown,
-        birth_date,
-        gender,
-        phone,
-        address,
-      };
-      modelUsers.updateProfil(data, (error) => {
+      itemPicture(req, res, (error) => {
         if (!error) {
-          return standardResponse(res, 200, true, "Data updating successful!");
+          if (req.file) {
+            const path = `assets${results[0].photo}`;
+            console.log(path);
+
+            if (fs.existsSync(path)) {
+              fs.unlink(path, (error) => {
+                if (error) throw error;
+                console.log(`${path} has been deleted`);
+              });
+            } else {
+              console.log("Previous photo is doesn't exists! ");
+            }
+
+            req.body.photo = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+          }
+
+          const {
+            photo,
+            name,
+            mobile_number,
+            address,
+            first_name,
+            last_name,
+            gender,
+            birth,
+          } = req.body;
+
+          const data = {
+            id,
+            photo,
+            name,
+            mobile_number,
+            address,
+            first_name,
+            last_name,
+            gender,
+            birth,
+          };
+
+          modelUsers.updateProfil(data, (error) => {
+            if (!error) {
+              return standardResponse(
+                res,
+                200,
+                true,
+                "Data updating successful!"
+              );
+            } else {
+              let message = "Data failed to update!";
+              if (!data.mobile_number) {
+                message = "Mobile number column cannot be empty";
+              }
+              return standardResponse(res, 400, false, message);
+            }
+          });
         } else {
-          console.log(error);
-          return standardResponse(res, 400, false, "Data failed to update!");
+          return standardResponse(
+            res,
+            400,
+            false,
+            "An error occured when file upload process!"
+          );
         }
       });
     } else {
-      console.log(error);
       return standardResponse(res, 404, false, "Data not found!");
     }
   });
@@ -170,7 +274,6 @@ exports.deleteUser = (req, res) => {
                     "Data has been deleted"
                   );
                 } else {
-                  console.log(error);
                   return standardResponse(
                     res,
                     500,
@@ -185,11 +288,9 @@ exports.deleteUser = (req, res) => {
           }
         });
       } else {
-        console.log(results[0].role);
         return standardResponse(res, 400, false, "You have no authority!");
       }
     } else {
-      console.log(error);
       return standardResponse(res, 400, false, "An error occured!");
     }
   });

@@ -5,10 +5,10 @@ const table = "users";
 exports.createUsers = (data, cb) => {
   connection.query(
     `
-    INSERT INTO ${table} (name, email, password)
-    VALUES (?, ?, ?)
+    INSERT INTO ${table} (email, password, mobile_number, display_name)
+    VALUES (?, ?, ?, ?)
     `,
-    [data.name, data.email, data.password],
+    [data.email, data.password, data.mobileNumber, data.name],
     cb
   );
 };
@@ -16,7 +16,7 @@ exports.createUsers = (data, cb) => {
 exports.getUserById = (id, cb) => {
   console.log(id);
   connection.query(
-    `SELECT id, photo, name, email, name_shown, name_first, name_last, birth_date, gender, phone, address FROM ${table} WHERE id=${id}`,
+    `SELECT id, photo, display_name, email, first_name, last_name, birth, gender, mobile_number, address FROM ${table} WHERE id=${id}`,
     cb
   );
 };
@@ -45,40 +45,47 @@ exports.getUsersByCond = (cond, cb) => {
   const sort = cond.sort[orderBy];
   connection.query(
     `
-  SELECT role, photo, name, email, password 
-  FROM ${table} WHERE ${table}.name LIKE '%${cond.search}%' 
+  SELECT role, photo, display_name, email, password 
+  FROM ${table} WHERE ${table}.display_name LIKE '%${cond.search}%' 
   ORDER BY ${table}.${orderBy} ${sort}
   LIMIT ? OFFSET ?`,
     [cond.limit, cond.offset],
     cb
   );
+  // console.log(connect.sql);
 };
 
 exports.getUsersCount = (cond, cb) => {
   connection.query(
-    `SELECT COUNT (${table}.id) as count FROM ${table} WHERE ${table}.name LIKE '%${cond.search}%'`,
+    `SELECT COUNT (${table}.id) as count FROM ${table} WHERE ${table}.display_name LIKE '%${cond.search}%'`,
     cb
   );
 };
 
 exports.updateProfil = (data, cb) => {
   connection.query(
-    `UPDATE ${table} SET photo=?, name=?, name_first=?, name_last=?, email=?, name_shown=?, birth_date=?, gender=?, phone=?, address=? WHERE id=?`,
+    `UPDATE ${table} SET photo=?, display_name=?, mobile_number=?, address=?, first_name=?, last_name=?, gender=?, birth=? WHERE id=?`,
     [
       data.photo,
       data.name,
-      data.name_first,
-      data.name_last,
-      data.email,
-      data.name_shown,
-      data.birth_date,
-      data.gender,
-      data.phone,
+      data.mobile_number,
       data.address,
+      data.first_name,
+      data.last_name,
+      data.gender,
+      data.birth,
       data.id,
     ],
     cb
   );
+};
+
+exports.updateProfilePart = (data, cb) => {
+  const sql = `UPDATE ${table} SET ${data.col}='${data.val}' WHERE id=${data.id}`;
+
+  // console.log(sql);
+
+  connection.query(sql, cb);
 };
 
 exports.deleteUser = (data, cb) => {

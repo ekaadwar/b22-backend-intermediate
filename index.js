@@ -5,14 +5,14 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
+<<<<<<< HEAD
 const port = process.env.PORT || 8080;
+=======
+const { APP_UPLOAD_ROUTE, APP_UPLOAD_PATH } = process.env;
+>>>>>>> dev
 
 app.use(bodyParser.urlencoded({ extended: false }));
-
 app.use(cors());
-
-const { APP_UPLOAD_ROUTE, APP_UPLOAD_PATH } = process.env;
-
 app.use(APP_UPLOAD_ROUTE, express.static(APP_UPLOAD_PATH));
 
 app.get("/", (req, res) => {
