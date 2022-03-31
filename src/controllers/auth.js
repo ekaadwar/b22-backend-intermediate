@@ -9,7 +9,6 @@ exports.register = async (req, res) => {
   data.password = await bcrypt.hash(data.password, await bcrypt.genSalt());
   data.name = data.email.split(`@`)[0];
 
-  console.log(data);
   modelUsers.createUsers(data, (error) => {
     if (!error) {
       return response(res, 200, true, "Register successfully!");
@@ -27,12 +26,13 @@ exports.register = async (req, res) => {
 
 exports.login = (req, res) => {
   const { email, password } = req.body;
-  // console.log(req.body);
   modelUsers.getUserByEmail(email, async (error, results) => {
     if (!error) {
       if (results.length > 0) {
         const user = results[0];
         const userId = user.id;
+        // add user role
+
         const compare = await bcrypt.compare(password, user.password);
         if (compare) {
           const payload = { id: user.id, email: user.email };

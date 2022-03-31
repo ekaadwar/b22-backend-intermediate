@@ -8,7 +8,6 @@ const { getUserById } = require("../models/users");
 exports.createTransaction = (req, res) => {
   // const code = codeTransaction(APP_TRANSACTION_PREFIX, 0);
   const data = req.body;
-  
 
   if (typeof data.item_id === "string") {
     data.items_id = [data.items_id];
@@ -16,6 +15,7 @@ exports.createTransaction = (req, res) => {
   }
   getItemsById(
     data.items_id.map((id) => parseInt(id)),
+
     (error, items) => {
       if (!error) {
         const code = codeTransaction(APP_TRANSACTION_PREFIX, 1);
@@ -84,6 +84,4 @@ exports.createTransaction = (req, res) => {
       }
     }
   );
-
-  // return response(res, 200, true, "OK");
 };
