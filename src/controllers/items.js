@@ -63,8 +63,6 @@ exports.insertItems = (req, res) => {
 };
 
 exports.getItems = (req, res) => {
-  // const condition = req.query.search;
-
   const condition = req.query;
   condition.search = condition.search || "";
   condition.sort = condition.sort || {};
@@ -98,6 +96,26 @@ exports.getItems = (req, res) => {
             condition.page > 1
               ? `${APP_URL}/items/?page=${pageInfo.currentPage - 1}`
               : null;
+
+          const length = results.length;
+
+          for (let i = 0; i < length; i++) {
+            if (results[i].picture !== null) {
+              const picture = results[i].picture.split("/")[2];
+              const path = "./assets/images/" + picture;
+              console.log(path);
+              try {
+                if (fs.existsSync(path)) {
+                  console.log("oke");
+                  results[i].picture = `${APP_URL}${results[i].picture}`;
+                } else {
+                  console.log("picture file is not exist");
+                }
+              } catch (err) {
+                console.log(err);
+              }
+            }
+          }
 
           return standardResponse(
             res,
@@ -176,10 +194,18 @@ exports.updatePartial = (req, res) => {
                   if (req.file) {
                     if (results[0].picture !== null) {
                       const path = `assets${results[0].picture}`;
-                      fs.unlink(path, (error) => {
-                        if (error) throw error;
-                        console.log(`${path} has been deleted`);
-                      });
+                      try {
+                        if (fs.existsSync(path)) {
+                          fs.unlink(path, (error) => {
+                            if (error) throw error;
+                            console.log(`${path} has been deleted`);
+                          });
+                        } else {
+                          console.log("picture file is not exist");
+                        }
+                      } catch (err) {
+                        console.log(err);
+                      }
                     }
                     req.body.picture = `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
                   }
@@ -270,10 +296,18 @@ exports.updateItem = (req, res) => {
                     if (!error) {
                       const path = "assets" + results[0].picture;
 
-                      fs.unlink(path, (error) => {
-                        if (error) throw error;
-                        console.log(`${path} has been deleted`);
-                      });
+                      try {
+                        if (fs.existsSync(path)) {
+                          fs.unlink(path, (error) => {
+                            if (error) throw error;
+                            console.log(`${path} has been deleted`);
+                          });
+                        } else {
+                          console.log("picture file is not exist");
+                        }
+                      } catch (err) {
+                        console.log(err);
+                      }
 
                       return standardResponse(
                         res,

@@ -85,6 +85,9 @@ exports.getUsers = (req, res) => {
 exports.getProfil = (req, res) => {
   modelUsers.getUserById(req.authUser.id, (error, results) => {
     if (!error) {
+      if (results[0].photo !== null) {
+        results[0].photo = `${APP_URL}${results[0].photo}`;
+      }
       return standardResponse(
         res,
         200,
@@ -112,7 +115,6 @@ exports.updateProfilePart = (req, res) => {
       modelUsers.getUserById(id, (error, results) => {
         if (!error) {
           if (req.file) {
-            console.log(results[0]);
             if (results[0].photo !== null) {
               const path = `assets${results[0].photo}`;
 

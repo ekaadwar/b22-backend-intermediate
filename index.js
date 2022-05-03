@@ -11,7 +11,9 @@ const port = process.env.PORT || 8080;
 const { APP_UPLOAD_ROUTE, APP_UPLOAD_PATH } = process.env;
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+// app.use(cors());
+const whiteList = ["http://localhost:3000", "http://localhost:3001"];
+app.use(cors(whiteList));
 app.use(APP_UPLOAD_ROUTE, express.static(APP_UPLOAD_PATH));
 
 app.get("/", (req, res) => {
