@@ -116,7 +116,8 @@ exports.updateProfilePart = (req, res) => {
         if (!error) {
           if (req.file) {
             if (results[0].photo !== null) {
-              const path = `assets${results[0].photo}`;
+              const fileImage = results[0].photo.split("/")[2];
+              const path = `assets/images/${fileImage}`;
 
               if (fs.existsSync(path)) {
                 fs.unlink(path, (error) => {
@@ -124,6 +125,7 @@ exports.updateProfilePart = (req, res) => {
                   console.log(`${path} has been deleted`);
                 });
               } else {
+                console.log(path);
                 console.log("Previous photo is doesn't exists! ");
               }
             }
