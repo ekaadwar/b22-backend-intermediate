@@ -7,13 +7,13 @@ exports.createTransactions = (data, cb) => {
     `INSERT INTO ${table} (code, total, tax, shipping_cost, shipping_address, payment_method, id_user) 
     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
-      data.code, //
-      data.total, //
-      data.tax, //
-      data.shipping_cost, //
+      data.code,
+      data.total,
+      data.tax,
+      data.shipping_cost,
       data.shipping_address,
-      data.payment_method, //
-      data.id_user, //
+      data.payment_method,
+      data.id_user,
     ],
     cb
   );
@@ -21,7 +21,7 @@ exports.createTransactions = (data, cb) => {
 
 exports.createItemTransactions = (data, cb) => {
   connection.query(
-    `INSERT INTO item_${table} (name, price, variants, amount, id_item, id_transaction)
+    `INSERT INTO items_${table} (name, price, variants, amount, id_item, id_transaction)
     VALUES (?, ?, ?, ?, ?, ?)`,
     [
       data.name,

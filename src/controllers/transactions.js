@@ -9,13 +9,16 @@ exports.createTransaction = (req, res) => {
   // const code = codeTransaction(APP_TRANSACTION_PREFIX, 0);
   const data = req.body;
 
-  if (typeof data.item_id === "string") {
+  if (typeof data.items_id === "string") {
     data.items_id = [data.items_id];
+  }
+
+  if (typeof data.items_amount === "string") {
     data.items_amount = [data.items_amount];
   }
+
   getItemsById(
     data.items_id.map((id) => parseInt(id)),
-
     (error, items) => {
       if (!error) {
         const code = codeTransaction(APP_TRANSACTION_PREFIX, 1);
@@ -23,7 +26,6 @@ exports.createTransaction = (req, res) => {
         const total = items
           .map((item, index) => item.price * data.items_amount[index])
           .reduce((acc, curr) => acc + curr);
-        console.log(items);
 
         const tax = (total * 10) / 100;
         const shippingCost = 10000;
@@ -45,6 +47,7 @@ exports.createTransaction = (req, res) => {
 
             modelTrans.createTransactions(dataTrans, (error, results) => {
               if (!error) {
+                console.log(items);
                 items.forEach((item, index) => {
                   const finalData = {
                     name: item.name,
@@ -53,6 +56,7 @@ exports.createTransaction = (req, res) => {
                     id_item: item.id,
                     id_transaction: results.insertId,
                   };
+
                   modelTrans.createItemTransactions(finalData, (error) => {
                     if (!error) {
                       console.log(
