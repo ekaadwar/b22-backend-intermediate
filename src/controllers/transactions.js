@@ -47,7 +47,6 @@ exports.createTransaction = (req, res) => {
 
             modelTrans.createTransactions(dataTrans, (error, results) => {
               if (!error) {
-                console.log(items);
                 items.forEach((item, index) => {
                   const finalData = {
                     name: item.name,
