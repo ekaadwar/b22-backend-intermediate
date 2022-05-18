@@ -103,20 +103,15 @@ exports.getItems = (req, res) => {
             if (results[i].picture !== null) {
               const picture = results[i].picture.split("/")[2];
               const path = "./assets/images/" + picture;
-              console.log(path);
               try {
                 if (fs.existsSync(path)) {
-                  console.log("oke");
                   results[i].picture = `${APP_URL}${results[i].picture}`;
-                } else {
-                  console.log("picture file is not exist");
                 }
               } catch (err) {
                 console.log(err);
               }
             }
           }
-
           return standardResponse(
             res,
             200,
@@ -126,7 +121,6 @@ exports.getItems = (req, res) => {
             pageInfo
           );
         } else {
-          console.log(error);
           return standardResponse(
             res,
             404,
@@ -137,7 +131,6 @@ exports.getItems = (req, res) => {
         }
       });
     } else {
-      console.log(error);
       return standardResponse(
         res,
         404,
@@ -282,20 +275,21 @@ exports.updateItem = (req, res) => {
             if (results.length > 0) {
               itemPicture(req, res, (error) => {
                 if (!error) {
+                  console.log(results[0]);
                   const { name, price } = req.body;
                   const categoryId = parseInt(req.body.category_id);
 
-                  req.body.picture =
-                    req.file &&
-                    `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`;
+                  req.body.picture = req.file
+                    ? `${process.env.APP_UPLOAD_ROUTE}/${req.file.filename}`
+                    : results[0].picture;
                   const { picture } = req.body;
 
                   const dataUpdate = { id, picture, name, price, categoryId };
+                  console.log(dataUpdate);
 
                   modelItems.updateItem(dataUpdate, (error) => {
                     if (!error) {
                       const path = "assets" + results[0].picture;
-
                       try {
                         if (fs.existsSync(path)) {
                           fs.unlink(path, (error) => {

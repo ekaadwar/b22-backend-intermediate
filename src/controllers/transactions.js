@@ -6,7 +6,6 @@ const modelTrans = require("../models/transactions");
 const { getUserById } = require("../models/users");
 
 exports.createTransaction = (req, res) => {
-  // const code = codeTransaction(APP_TRANSACTION_PREFIX, 0);
   const data = req.body;
 
   if (typeof data.items_id === "string") {

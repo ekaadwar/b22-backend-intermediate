@@ -13,7 +13,6 @@ exports.register = async (req, res) => {
     if (!error) {
       return response(res, 200, true, "Register successfully!");
     } else {
-      console.log(error);
       return response(
         res,
         500,
@@ -31,7 +30,6 @@ exports.login = (req, res) => {
       if (results.length > 0) {
         const user = results[0];
         const userId = user.id;
-        // add user role
 
         const compare = await bcrypt.compare(password, user.password);
         if (compare) {
@@ -42,11 +40,9 @@ exports.login = (req, res) => {
           response(res, 401, false, "Email or Password is wrong!");
         }
       } else {
-        console.log(error);
         response(res, 404, false, "Email not found!");
       }
     } else {
-      console.log(error);
       response(res, 400, false, "An error occured");
     }
   });

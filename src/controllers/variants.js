@@ -1,11 +1,17 @@
+/* eslint-disable */
 const modelVari = require("../models/variants");
 const { response: standardResponse } = require("../helpers/standardResponse");
 
 exports.insertVari = (req, res) => {
   const { size } = req.body;
-  modelVari.insertVari(size, (error, results, _fields) => {
+  modelVari.insertVari(size, (error) => {
     if (!error) {
-      return standardResponse(res, 200, true, "Data has been inserted succesfully!");
+      return standardResponse(
+        res,
+        200,
+        true,
+        "Data has been inserted succesfully!"
+      );
     } else {
       return standardResponse(res, 500, false, "Data insertion has failed!");
     }
@@ -13,7 +19,7 @@ exports.insertVari = (req, res) => {
 };
 
 exports.getVari = (req, res) => {
-  modelVari.getVari((error, results, _fields) => {
+  modelVari.getVari((error, results) => {
     if (!error) {
       return standardResponse(res, 200, true, "Data read succesfully", results);
     } else {
@@ -25,9 +31,15 @@ exports.getVari = (req, res) => {
 
 exports.detailVari = (req, res) => {
   const { id } = req.params;
-  modelVari.getVariById(id, (error, results, _fields) => {
+  modelVari.getVariById(id, (error, results) => {
     if (!error) {
-      return standardResponse(res, 200, true, "Data read successfully by id!", results);
+      return standardResponse(
+        res,
+        200,
+        true,
+        "Data read successfully by id!",
+        results
+      );
     } else {
       console.log(error);
       return standardResponse(res, 500, false, "Data can't read by id!");
