@@ -289,18 +289,22 @@ exports.updateItem = (req, res) => {
 
                   modelItems.updateItem(dataUpdate, (error) => {
                     if (!error) {
-                      const path = "assets" + results[0].picture;
-                      try {
-                        if (fs.existsSync(path)) {
-                          fs.unlink(path, (error) => {
-                            if (error) throw error;
-                            console.log(`${path} has been deleted`);
-                          });
-                        } else {
-                          console.log("picture file is not exist");
+                      if (req.file) {
+                        const prevPicture = results[0].picture.split("/")[2];
+                        const path = "assets/images/" + prevPicture;
+                        console.log(path);
+                        try {
+                          if (fs.existsSync(path)) {
+                            fs.unlink(path, (error) => {
+                              if (error) throw error;
+                              console.log(`${path} has been deleted`);
+                            });
+                          } else {
+                            console.log("picture file is not exist");
+                          }
+                        } catch (err) {
+                          console.log(err);
                         }
-                      } catch (err) {
-                        console.log(err);
                       }
 
                       return standardResponse(
@@ -315,7 +319,7 @@ exports.updateItem = (req, res) => {
                         res,
                         500,
                         false,
-                        "Data can't update!"
+                        `Data can't update! error : ${error.sqlMessage}`
                       );
                     }
                   });
