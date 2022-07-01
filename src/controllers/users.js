@@ -83,7 +83,9 @@ exports.getUsers = (req, res) => {
 };
 
 exports.getProfil = (req, res) => {
-  modelUsers.getUserById(req.authUser.id, (error, results) => {
+  // const userId = req.authUser.id
+  const userId = 9;
+  modelUsers.getUserById(userId, (error, results) => {
     if (!error) {
       if (results[0].photo !== null) {
         results[0].photo = `${APP_URL}${results[0].photo}`;
@@ -109,8 +111,9 @@ exports.getProfil = (req, res) => {
 exports.updateProfilePart = (req, res) => {
   itemPicture(req, res, (error) => {
     if (!error) {
-      const { id: idUser } = req.authUser;
-      const id = parseInt(idUser);
+      // const { id: idUser } = req.authUser;
+      // const id = parseInt(idUser);
+      const id = 9;
 
       modelUsers.getUserById(id, (error, results) => {
         if (!error) {

@@ -82,9 +82,6 @@ exports.updateProfil = (data, cb) => {
 
 exports.updateProfilePart = (data, cb) => {
   const sql = `UPDATE ${table} SET ${data.col}='${data.val}' WHERE id=${data.id}`;
-
-  // console.log(sql);
-
   connection.query(sql, cb);
 };
 
