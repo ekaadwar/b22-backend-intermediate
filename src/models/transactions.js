@@ -2,6 +2,22 @@ const connection = require("../helpers/database");
 
 const table = "transactions";
 
+exports.getMyTransaction = (id, cb) => {
+  connection.query(
+    `SELECT id, code, total, tax, shipping_cost, shipping_address, payment_method, created_at, updated_at FROM transactions WHERE id_user=?`,
+    [id],
+    cb
+  );
+};
+
+exports.getMyTransactionDetail = (data, cb) => {
+  connection.query(
+    `SELECT items.id, items.name, items.price, items_transactions.amount AS amount, items.picture, items_transactions.created_at, items_transactions.updated_at, transactions.id AS transactions_id, transactions.id_user FROM items_transactions LEFT JOIN items ON items_transactions.id_item = items.id LEFT JOIN transactions ON items_transactions.id_transaction = transactions.id WHERE transactions.id = ? AND transactions.id_user = ?;`,
+    [data.idTransaction, data.id],
+    cb
+  );
+};
+
 exports.createTransactions = (data, cb) => {
   connection.query(
     `INSERT INTO ${table} (code, total, tax, shipping_cost, shipping_address, payment_method, id_user) 
@@ -31,6 +47,22 @@ exports.createItemTransactions = (data, cb) => {
       data.id_item,
       data.id_transaction,
     ],
+    cb
+  );
+};
+
+exports.deleteMyTransaction = (data, cb) => {
+  connection.query(
+    `DELETE FROM ${table} WHERE id=? AND id_user=?`,
+    [data.idTrans, data.idUser],
+    cb
+  );
+};
+
+exports.deleteItemTransaction = (id, cb) => {
+  connection.query(
+    `DELETE FROM items_transactions WHERE id_transaction = ?`,
+    [id],
     cb
   );
 };

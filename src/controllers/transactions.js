@@ -87,3 +87,89 @@ exports.createTransaction = (req, res) => {
     }
   );
 };
+
+exports.getMyTransaction = (req, res) => {
+  const { id: idUser } = req.authUser;
+  const id = parseInt(idUser);
+
+  modelTrans.getMyTransaction(id, (error, result) => {
+    if (!error) {
+      if (result.length > 0) {
+        return response(res, 200, true, result);
+      } else {
+        return response(res, 404, false, "data not found");
+      }
+    } else {
+      return response(res, 500, false, "an error occured");
+    }
+  });
+};
+
+exports.getMyTransactionDetail = (req, res) => {
+  const { id: idUser } = req.authUser;
+  const id = parseInt(idUser);
+  const { id: idParams } = req.params;
+  const idTransaction = parseInt(idParams);
+  const data = { id, idTransaction };
+
+  modelTrans.getMyTransaction(id, (error, result) => {
+    if (!error) {
+      if (result.length > 0) {
+        modelTrans.getMyTransactionDetail(data, (err, results) => {
+          if (!error) {
+            if (results.length > 0) {
+              return response(res, 200, true, results);
+            } else {
+              return response(res, 500, false, "No details found");
+            }
+          } else {
+            console.log(err);
+            return response(
+              res,
+              500,
+              false,
+              "an error occured when get transaction details"
+            );
+          }
+        });
+      } else {
+        return response(res, 404, false, "data not found");
+      }
+    } else {
+      return response(res, 500, false, "an error occured");
+    }
+  });
+};
+
+exports.deleteMyTransaction = (req, res) => {
+  const { id: idUserString } = req.authUser;
+  const idUser = parseInt(idUserString);
+  const { id: idTransString } = req.params;
+  const idTrans = parseInt(idTransString);
+
+  const data = { idUser, idTrans };
+
+  modelTrans.deleteMyTransaction(data, (error) => {
+    if (!error) {
+      modelTrans.deleteItemsTransaction(idTrans, (error) => {
+        if (!error) {
+          return response(
+            res,
+            200,
+            true,
+            "transaction data successfully deleted"
+          );
+        } else {
+          return response(
+            res,
+            500,
+            false,
+            "an error occured when deleting items_transaction data"
+          );
+        }
+      });
+    } else {
+      return response(res, 500, false, "an error occured");
+    }
+  });
+};
