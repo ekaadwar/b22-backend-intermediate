@@ -88,14 +88,109 @@ exports.createTransaction = (req, res) => {
   );
 };
 
+// const getResult = (id, idTrans) => {
+//   let data = [];
+//   idTrans.map((idT) => {
+//     const index = { idUser: id, idTransaction: idT };
+//     modelTrans.getMyTransactionById(index, (err, results) => {
+//       if (!err) {
+//         if (results.length > 0) {
+//           let items = [];
+
+//           for (let x = 0; x < results.length; x++) {
+//             items.push({
+//               name: results[x].name,
+//               picture: results[x].picture,
+//             });
+//           }
+
+//           data.push({
+//             transactions_id: results[0].transactions_id,
+//             code: results[0].code,
+//             items,
+//             total: results[0].total,
+//             tax: results[0].tax,
+//             shipping_cost: results[0].shipping_cost,
+//             shipping_address: results[0].shipping_address,
+//             payment_method: results[0].payment_method,
+//             created_at: results[0].created_at,
+//             updated_at: results[0].updated_at,
+//           });
+
+//           // console.log("function");
+//           // console.log(data);
+//           return data;
+//         } else {
+//           console.log("mytransaction data by id is not found");
+//         }
+//       } else {
+//         console.log("an error occured when get my transaction data by id");
+//       }
+//     });
+//   });
+// };
+
 exports.getMyTransaction = (req, res) => {
   const { id: idUser } = req.authUser;
   const id = parseInt(idUser);
 
-  modelTrans.getMyTransaction(id, (error, result) => {
+  modelTrans.getMyTransaction(id, (error, results) => {
     if (!error) {
-      if (result.length > 0) {
-        return response(res, 200, true, result);
+      if (results.length > 0) {
+        // const length = results.length;
+        // let idTrans = [];
+
+        // for (let i = 0; i < length; i++) {
+        //   if (i === 0) {
+        //     idTrans.push(results[i].transactions_id);
+        //   } else {
+        //     let j = i - 1;
+        //     if (results[i].transactions_id !== results[j].transactions_id) {
+        //       idTrans.push(results[i].transactions_id);
+        //     }
+        //   }
+        // }
+
+        // idTrans.map((idT) => {
+        //   const index = { idUser: id, idTransaction: idT };
+        //   modelTrans.getMyTransactionById(index, (err, results) => {
+        //     if (!err) {
+        //       if (results.length > 0) {
+        //         let items = [];
+
+        //         for (let x = 0; x < results.length; x++) {
+        //           items.push({
+        //             name: results[x].name,
+        //             picture: results[x].picture,
+        //           });
+        //         }
+
+        //         data.push({
+        //           transactions_id: results[0].transactions_id,
+        //           code: results[0].code,
+        //           items,
+        //           total: results[0].total,
+        //           tax: results[0].tax,
+        //           shipping_cost: results[0].shipping_cost,
+        //           shipping_address: results[0].shipping_address,
+        //           payment_method: results[0].payment_method,
+        //           created_at: results[0].created_at,
+        //           updated_at: results[0].updated_at,
+        //         });
+        //       } else {
+        //         console.log("mytransaction data by id is not found");
+        //       }
+        //     } else {
+        //       console.log(
+        //         "an error occured when get my transaction data by id"
+        //       );
+        //     }
+        //   });
+        // });
+
+        // console.log("final");
+        // console.log(data);
+        return response(res, 200, true, results);
       } else {
         return response(res, 404, false, "data not found");
       }

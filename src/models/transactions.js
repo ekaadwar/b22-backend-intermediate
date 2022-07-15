@@ -10,6 +10,43 @@ exports.getMyTransaction = (id, cb) => {
   );
 };
 
+// exports.getMyTransaction = (id, cb) => {
+//   connection.query(
+//     `SELECT
+//       transactions.id AS transactions_id, transactions.code, items.name, items.picture,transactions.total, transactions.total, transactions.tax, transactions.shipping_cost, transactions.shipping_address, transactions.payment_method, transactions.created_at, transactions.updated_at
+//     FROM transactions
+//     LEFT JOIN items_transactions ON transactions.id = items_transactions.id_transaction
+//     LEFT JOIN items ON items_transactions.id_item = items.id
+//     WHERE id_user=?`,
+//     [id],
+//     cb
+//   );
+// };
+
+exports.getMyTransactionById = (index, cb) => {
+  connection.query(
+    `SELECT 
+      transactions.id AS transactions_id, 
+      transactions.code, 
+      items.name, 
+      items.picture,
+      transactions.total, 
+      transactions.total, 
+      transactions.tax, 
+      transactions.shipping_cost, 
+      transactions.shipping_address, 
+      transactions.payment_method, 
+      transactions.created_at, 
+      transactions.updated_at 
+    FROM transactions 
+    LEFT JOIN items_transactions ON transactions.id = items_transactions.id_transaction 
+    LEFT JOIN items ON items_transactions.id_item = items.id
+    WHERE id_user=? AND transactions.id=?`,
+    [index.idUser, index.idTransaction],
+    cb
+  );
+};
+
 exports.getMyTransactionDetail = (data, cb) => {
   connection.query(
     `SELECT items.id, items.name, items.price, items_transactions.amount AS amount, items.picture, items_transactions.created_at, items_transactions.updated_at, transactions.id AS transactions_id, transactions.id_user FROM items_transactions LEFT JOIN items ON items_transactions.id_item = items.id LEFT JOIN transactions ON items_transactions.id_transaction = transactions.id WHERE transactions.id = ? AND transactions.id_user = ?;`,
