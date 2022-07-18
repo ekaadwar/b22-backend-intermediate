@@ -49,7 +49,25 @@ exports.getMyTransactionById = (index, cb) => {
 
 exports.getMyTransactionDetail = (data, cb) => {
   connection.query(
-    `SELECT items.id, items.name, items.price, items_transactions.amount AS amount, items.picture, items_transactions.created_at, items_transactions.updated_at, transactions.id AS transactions_id, transactions.id_user FROM items_transactions LEFT JOIN items ON items_transactions.id_item = items.id LEFT JOIN transactions ON items_transactions.id_transaction = transactions.id WHERE transactions.id = ? AND transactions.id_user = ?;`,
+    `SELECT 
+      items.id, 
+      items.name, 
+      items.price, 
+      items_transactions.amount AS amount, 
+      items.picture, 
+      items_transactions.created_at, 
+      items_transactions.updated_at, 
+      transactions.id AS transactions_id, 
+      transactions.code,
+      transactions.total AS subtotal,
+      transactions.tax,
+      transactions.shipping_cost,
+      transactions.payment_method,
+      transactions.id_user 
+      FROM items_transactions 
+      LEFT JOIN items ON items_transactions.id_item = items.id 
+      LEFT JOIN transactions ON items_transactions.id_transaction = transactions.id 
+      WHERE transactions.id = ? AND transactions.id_user = ?;`,
     [data.idTransaction, data.id],
     cb
   );
